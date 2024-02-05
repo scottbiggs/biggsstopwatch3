@@ -272,10 +272,14 @@ fun MainDisplay(mainViewModel : MainViewModel) {
 
                 val splitTime = (stopwatchSplit.value ?: 0) - (stopwatchStart.value ?: 0)
                 val splitString = getDisplayTime(splitTime)
-                AutoSizeText(
-                    text = splitString,
-                    textStyle = TextStyle(fontSize = 200.sp),   // max font size
-                    Modifier.background(Color.Yellow))
+                if ((stopwatchState.value == SPLIT_RUNNING_STATE) ||
+                    (stopwatchState.value == SPLIT_STOPPED_STATE)) {
+                    AutoSizeText(
+                        text = splitString,
+                        textStyle = TextStyle(fontSize = 200.sp),   // max font size
+                        Modifier.background(Color.Yellow)
+                    )
+                }
             }
 
             // NOTE: this updates AUTOMATICALLY because of how stopwatchState is
