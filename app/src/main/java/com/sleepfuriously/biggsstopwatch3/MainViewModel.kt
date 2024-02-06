@@ -4,15 +4,9 @@ import android.os.CountDownTimer
 import android.os.SystemClock
 import android.util.Log
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.lifecycle.ViewModel
-import kotlin.random.Random
-
-
 
 
 /**
@@ -22,9 +16,7 @@ import kotlin.random.Random
  * that respects life cycles).  The LiveData lives within the
  * ViewModel class.
  */
-class MainViewModel(
-    private val savedStateHandle: SavedStateHandle      // retains previous state if force closed
-) : ViewModel() {
+class MainViewModel : ViewModel() {
 
 
     //-------------------------
@@ -40,7 +32,7 @@ class MainViewModel(
 //    val stopwatchState: StateFlow<Int> = savedStateHandle.getStateFlow(STATE_HANDLE_KEY, START_STATE)   // stateflow version
 
     // mutable state (compose state) which was designed specifically for jetpack compose
-    val stopwatchState: MutableState<Int> = mutableStateOf(START_STATE)
+    val stopwatchState: MutableState<Int> = mutableIntStateOf(START_STATE)
 
     // another way of doing above
 //    var stopwatchState2 by mutableStateOf(START_STATE)
@@ -53,13 +45,13 @@ class MainViewModel(
 //    val stopwatchStart: MutableLiveData<Long> by lazy {
 //        MutableLiveData<Long>()
 //    }
-    val stopwatchStart: MutableState<Long> = mutableStateOf(0L)
+    val stopwatchStart: MutableState<Long> = mutableLongStateOf(0L)
 
     /**
      * Added to [stopwatchStart] to calculate the total running time (for starting
      * and restarting).
      */
-    private val elapsedTime: MutableState<Long> = mutableStateOf(0L)
+    private val elapsedTime: MutableState<Long> = mutableLongStateOf(0L)
 
     /**
      * The time the split button was pushed.
@@ -67,26 +59,19 @@ class MainViewModel(
 //    val stopwatchSplit: MutableLiveData<Long> by lazy {
 //        MutableLiveData<Long>()
 //    }
-    val stopwatchSplit: MutableState<Long> = mutableStateOf(0L)
+    val stopwatchSplit: MutableState<Long> = mutableLongStateOf(0L)
 
-    /**
-     * True only when the split button should be active.
-     */
-//    val splitButtonActive: MutableLiveData<Boolean> by lazy {
-//        MutableLiveData<Boolean>()
-//    }
-    val splitButtonActive: MutableState<Boolean> = mutableStateOf(false)
 
     /**
      * Signals to the Activity that a tick has occurred.  It will actually
      * contain the number of milliseconds since [stopwatchStart].
      */
-    var tick: MutableState<Long> = mutableStateOf(0L)
+    var tick: MutableState<Long> = mutableLongStateOf(0L)
 
     /**
      * This is what makes the stopwatch tick.
      */
-    val timer = object : CountDownTimer(Long.MAX_VALUE, 30) {
+    private val timer = object : CountDownTimer(Long.MAX_VALUE, 30) {
         override fun onTick(millisUntilFinished: Long) {
             if ((stopwatchState.value == RUNNING_STATE) ||
                 (stopwatchState.value == SPLIT_RUNNING_STATE)) {
@@ -248,9 +233,6 @@ class MainViewModel(
 
     companion object {
 
-        /** key for accessing the state from the savedStateHandle */
-        const val STATE_HANDLE_KEY = "state"
-
         /**
          * button ids.  this class will refer to the buttons throught
          * these ids instead of a Button class or some other View.
@@ -281,37 +263,6 @@ class MainViewModel(
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //  inner classes
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    /**
-     * Extending [CountDownTimer] allows me to neatly make my
-     * own timer.
-     *
-     * @param   millisInFuture      How many milliseconds should this
-     *                              timer run?  Use Long.MAX_VALUE to
-     *                              run as long as possible.
-     *
-     * @param   countDownInterval   Number of milliseconds between
-     *                              calls to onTick().
-     *
-     */
-    class MyCountdown(
-        val millisInFuture : Long,
-        val countDownInterval : Long,
-        var ticker : Long
-    ) : CountDownTimer(millisInFuture, countDownInterval) {
-
-
-        /**
-         * update the display on each tick
-         */
-        override fun onTick(millisUntilFinished: Long) {
-            ticker += countDownInterval
-        }
-
-        override fun onFinish() {
-            // not used
-        }
-    }
 
 }
 

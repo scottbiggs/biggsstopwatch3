@@ -46,10 +46,6 @@ import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.SPLIT_STOPPED_
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.START_STATE
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.STOPPED_STATE
 import com.sleepfuriously.biggsstopwatch3.ui.theme.BiggsStopwatch3Theme
-import com.sleepfuriously.biggsstopwatch3.ui.theme.maroon
-import com.sleepfuriously.biggsstopwatch3.ui.theme.maroon_light
-import com.sleepfuriously.biggsstopwatch3.ui.theme.yellow_dark
-import com.sleepfuriously.biggsstopwatch3.ui.theme.yellow_light
 
 
 /**
