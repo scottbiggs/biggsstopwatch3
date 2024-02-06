@@ -2,12 +2,11 @@ package com.sleepfuriously.biggsstopwatch3
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,12 +30,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.BUTTON_SPLIT_CLEAR
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.BUTTON_START_STOP
@@ -43,9 +44,12 @@ import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.RUNNING_STATE
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.SPLIT_RUNNING_STATE
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.SPLIT_STOPPED_STATE
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.START_STATE
-import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.STATE_NAMES
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.STOPPED_STATE
 import com.sleepfuriously.biggsstopwatch3.ui.theme.BiggsStopwatch3Theme
+import com.sleepfuriously.biggsstopwatch3.ui.theme.maroon
+import com.sleepfuriously.biggsstopwatch3.ui.theme.maroon_light
+import com.sleepfuriously.biggsstopwatch3.ui.theme.yellow_dark
+import com.sleepfuriously.biggsstopwatch3.ui.theme.yellow_light
 
 
 /**
@@ -86,7 +90,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // get viewmodel instance
-        mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
 
         testString = getString(R.string.test_string)
@@ -122,37 +126,29 @@ fun getDisplayTime(millis : Long) : String {
     val hundredths = remainder / 10L
 
     // figure out the pieces
-    var hoursStr = ""
-    var minStr = ""
-    var secStr = ""
-    var hunStr = ""
 
-    if (hours >= 10)
-        hoursStr = "$hours"
-    else
-        hoursStr = "0$hours"
+    val hoursStr: String =
+        if (hours >= 10) "$hours"
+        else "0$hours"
 
-    if (minutes >= 10)
-        minStr = "$minutes"
-    else
-        minStr = "0$minutes"
+    val minStr: String =
+        if (minutes >= 10) "$minutes"
+        else "0$minutes"
 
-    if (seconds >= 10)
-        secStr = "$seconds"
-    else
-        secStr = "0$seconds"
+    val secStr: String =
+        if (seconds >= 10) "$seconds"
+        else "0$seconds"
 
-    if (hundredths >= 10)
-        hunStr = "$hundredths"
-    else
-        hunStr = "0$hundredths"
+    val hunStr: String =
+        if (hundredths >= 10) "$hundredths"
+        else "0$hundredths"
 
     // If there are more than 100 hours, then we won't bother
     // displaying hundredths of seconds.
-    if (hours >= 100)
-        return "$hoursStr:$minStr:$secStr"
-    else
-        return "$hoursStr:$minStr:$secStr.$hunStr"
+    return when {
+        (hours >= 100) -> "$hoursStr:$minStr:$secStr"
+        else -> "$hoursStr:$minStr:$secStr.$hunStr"
+    }
 }
 
 
@@ -166,25 +162,20 @@ fun getDisplayTime(millis : Long) : String {
 @Composable
 fun MainDisplay(mainViewModel : MainViewModel) {
 
+    val stopwatchState = mainViewModel.stopwatchState
+    val stopwatchStart = mainViewModel.stopwatchStart
+    val stopwatchSplit = mainViewModel.stopwatchSplit
+    val tick = mainViewModel.tick
+
+
     BiggsStopwatch3Theme {
-
-//        val stopwatchState by mainViewModel.stopwatchState.collectAsState()     // stateflow version
-        val stopwatchState = mainViewModel.stopwatchState           // any composable that uses this value
-                                                                    // will automatically recompose
-
-        val stopwatchStart = mainViewModel.stopwatchStart           // also composable version
-
-        val stopwatchSplit = mainViewModel.stopwatchSplit           // also composable
-
-        val tick = mainViewModel.tick
-
 
         // box background for entire drawing.  Also the buttons will be at the
         // bottom of this box.
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.LightGray)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(24.dp),
             Alignment.BottomStart,
         ) {
@@ -197,8 +188,14 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                 Column {
 
                 }
+
+                // START / STOP
                 ElevatedButton(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    ),
                     onClick = {
                         mainViewModel.nextState(BUTTON_START_STOP)
                         Log.d(TAG, "start button click")
@@ -212,13 +209,18 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                             SPLIT_STOPPED_STATE -> BUTTON_START_TEXT
                             else -> "error"
                         }
-                    Text("$startStopButtonTxt")
+                    Text(startStopButtonTxt)
                 }
 
                 Spacer(Modifier.width(16.dp))
 
+                // SPLIT / CLEAR
                 ElevatedButton(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    ),
                     enabled = stopwatchState.value != START_STATE,
                     onClick = {
                         mainViewModel.nextState(BUTTON_SPLIT_CLEAR)
@@ -246,10 +248,10 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                 text = getDisplayTime(tick.value),
                 textStyle = TextStyle(
                     fontSize = 240.sp,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = if (isSystemInDarkTheme()) Color.White else Color.Black,
                     shadow = Shadow(
-                        color = Color.Black,
                         offset = Offset(5.0f, 10.0f),
+                        color = MaterialTheme.colorScheme.primary,
                         blurRadius = 3f
                     )
                 )
@@ -257,48 +259,22 @@ fun MainDisplay(mainViewModel : MainViewModel) {
 
             Spacer(Modifier.height(4.dp))
 
-            Row(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .fillMaxWidth(0.75f)
-            ) {
+            // split time
+            val splitTime = stopwatchSplit.value - stopwatchStart.value
+            val splitString = getDisplayTime(splitTime)
+            if ((stopwatchState.value == SPLIT_RUNNING_STATE) ||
+                (stopwatchState.value == SPLIT_STOPPED_STATE)) {
                 Text(
-                    text = "split",
-                    modifier = Modifier.align(
-                        Alignment.Bottom
-                    ))
-
-                Spacer(Modifier.width(6.dp))
-
-                val splitTime = (stopwatchSplit.value ?: 0) - (stopwatchStart.value ?: 0)
-                val splitString = getDisplayTime(splitTime)
-                if ((stopwatchState.value == SPLIT_RUNNING_STATE) ||
-                    (stopwatchState.value == SPLIT_STOPPED_STATE)) {
-                    AutoSizeText(
-                        text = splitString,
-                        textStyle = TextStyle(fontSize = 200.sp),   // max font size
-                        Modifier.background(Color.Yellow)
-                    )
-                }
+                    splitString,
+                    fontSize = (current_fontsize / 2),
+                    textAlign = TextAlign.End,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 40.dp)
+                )
             }
 
-            // NOTE: this updates AUTOMATICALLY because of how stopwatchState is
-            // defined.  Any composable that uses it will automatically update.
-            // Cool--or is it magic?
-            Text(
-                "state = ${STATE_NAMES[stopwatchState.value]}",
-                color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier
-                    .background(Color.Cyan)
-                    .clickable {
-                        Log.d(TAG, "click")
-                        mainViewModel.nextState(2)  // fixme: change param
-                    }
-            )
-
-            Text(text = "start time = ${stopwatchStart.value}")
-            Text("split time = ${stopwatchSplit.value}")
 
         }
 
@@ -342,7 +318,7 @@ fun AutoSizeText(
                     scaledTextStyle.copy(fontSize = scaledTextStyle.fontSize * 0.9)
             } else {
                 current_fontsize = scaledTextStyle.fontSize
-                Log.d(TAG, "font size = ${current_fontsize}")
+                Log.d(TAG, "font size = $current_fontsize")
                 readyToDraw = true
             }
         }
@@ -370,33 +346,6 @@ fun PreviewStopwatch() {
 }
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//  classes
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-//-------------
-//  While I'm actually counting UP, this is useful for getting
-//  lots of looping to update the UI.
-//
-//  input
-//      millisInFuture      To use this forever, enter the MAX LONG for millisInFuture.
-//                          While not exactly forever, it's good enough for this app!
-//
-//      countDownInterval   The frequency the onTick() function fires (approximately).
-//
-class StopwatchTimer(
-    val millisInFuture : Long,
-    val countDownInterval : Long
-) : CountDownTimer(millisInFuture, countDownInterval) {
-
-    override fun onTick(millisUntilFinished: Long) {
-        // todo: increment timer
-    }
-
-    override fun onFinish() {
-        // noop
-    }
-}
 
 //-------------------------
 //  constants
