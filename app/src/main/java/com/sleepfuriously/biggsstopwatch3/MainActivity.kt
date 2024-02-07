@@ -62,7 +62,7 @@ import com.sleepfuriously.biggsstopwatch3.ui.theme.BiggsStopwatch3Theme
 // Should be a constant, but need to get it from strings.xml
 lateinit var testString : String
 
-var current_fontsize = 0.sp
+var current_fontsize = 0.sp     // todo:  this is not used any more
 
 
 //-------------------------
@@ -177,8 +177,8 @@ fun MainDisplay(mainViewModel : MainViewModel) {
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-//                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
                 // Start Button
                 Column {
@@ -262,7 +262,7 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                 (stopwatchState.value == SPLIT_STOPPED_STATE)) {
                 Text(
                     splitString,
-                    fontSize = (current_fontsize / 2),
+                    fontSize = 42.sp,
                     textAlign = TextAlign.End,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
@@ -271,8 +271,7 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                 )
             }
 
-
-        }
+        } // column for timer displays
 
     }
 
