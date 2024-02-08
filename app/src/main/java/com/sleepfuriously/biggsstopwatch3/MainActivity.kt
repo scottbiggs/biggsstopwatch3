@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
@@ -32,11 +31,12 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.ViewModelProvider
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.BUTTON_SPLIT_CLEAR
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.BUTTON_START_STOP
@@ -236,24 +236,50 @@ fun MainDisplay(mainViewModel : MainViewModel) {
             }
         }
 
-        // holds vertical components: main timer and split timers
-        Column {
 
-            // Main timer
+        // for timer and split timer, I'm using a constraintlayout.  Makes some things
+        // a lot easier.
+
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+
+            // line for the top of the main display
+            val mainDisplayGuide = createGuidelineFromTop(
+                if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    0.35f   // about a third down for portrait mode
+                }
+                else {
+                    0f      // keep this at top for landscape mode
+                }
+
+            )
+
+            // names for the constrained widgets
+            val (
+                mainTimer, splitTimer
+            ) = createRefs()
+
             AutoSizeText(
                 text = getDisplayTime(tick.value),
                 textStyle = TextStyle(
                     fontSize = 240.sp,
                     color = if (isSystemInDarkTheme()) Color.White else Color.Black,
                     shadow = Shadow(
-                        offset = Offset(5.0f, 10.0f),
+                        offset = Offset(5.0f, 7.0f),
                         color = MaterialTheme.colorScheme.primary,
                         blurRadius = 3f
                     )
-                )
+                ),
+                modifier = Modifier
+                    .constrainAs(mainTimer) {
+                        start.linkTo(parent.start, 16.dp)
+                        end.linkTo(parent.end, 16.dp)
+                        top.linkTo(mainDisplayGuide)
+                    }
             )
-
-            Spacer(Modifier.height(4.dp))
 
             // split time
             val splitTime = stopwatchSplit.value - stopwatchStart.value
@@ -262,17 +288,18 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                 (stopwatchState.value == SPLIT_STOPPED_STATE)) {
                 Text(
                     splitString,
-                    fontSize = 42.sp,
+                    fontSize = 40.sp,
                     textAlign = TextAlign.End,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 40.dp)
+                        .constrainAs(splitTimer) {
+                        end.linkTo(mainTimer.end)
+                        top.linkTo(mainTimer.bottom, 16.dp)
+                        }
                 )
             }
 
-        } // column for timer displays
-
+        }
     }
 
 }
@@ -320,26 +347,6 @@ fun AutoSizeText(
     )
 
 }
-
-//-------------------
-//  previews
-//-------------------
-
-@Preview(
-    name = "dark mode",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
-)
-@Preview(
-    name = "light mode",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_NO
-)
-@Composable
-fun PreviewStopwatch() {
-//    MainDisplay()
-}
-
 
 
 //-------------------------
