@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 
 
@@ -17,7 +18,6 @@ import androidx.lifecycle.ViewModel
  * ViewModel class.
  */
 class MainViewModel : ViewModel() {
-
 
     //-------------------------
     //  vars
@@ -61,6 +61,10 @@ class MainViewModel : ViewModel() {
 //    }
     val stopwatchSplit: MutableState<Long> = mutableLongStateOf(0L)
 
+    /**
+     * When TRUE, clicks are played on button taps.
+     */
+    val clickOn: MutableState<Boolean> = mutableStateOf(true)
 
     /**
      * Signals to the Activity that a tick has occurred.  It will actually
@@ -91,6 +95,11 @@ class MainViewModel : ViewModel() {
     //-------------------------
     //  functions
     //-------------------------
+
+    init {
+        // todo Load up prefs
+        //
+    }
 
     /**
      * Here is the table for state changes:

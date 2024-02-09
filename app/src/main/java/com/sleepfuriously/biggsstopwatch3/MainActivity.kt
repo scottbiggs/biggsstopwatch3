@@ -1,6 +1,9 @@
 package com.sleepfuriously.biggsstopwatch3
 
 import android.content.res.Configuration
+import android.media.AudioManager
+import android.media.MediaPlayer
+import android.media.SoundPool
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -62,7 +65,13 @@ import com.sleepfuriously.biggsstopwatch3.ui.theme.BiggsStopwatch3Theme
 // Should be a constant, but need to get it from strings.xml
 lateinit var testString : String
 
-var current_fontsize = 0.sp     // todo:  this is not used any more
+//var current_fontsize = 0.sp
+
+/** access to the view model */
+private lateinit var mainViewModel: MainViewModel
+
+/** another way of playing sounds */
+private var soundPool : SoundPool? = null
 
 
 //-------------------------
@@ -75,8 +84,6 @@ class MainActivity : ComponentActivity() {
     //  properties
     //-------------------
 
-    /** access to the view model */
-    private lateinit var mainViewModel: MainViewModel
 
 
     //-------------------
@@ -94,6 +101,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             MainDisplay(mainViewModel = mainViewModel)
         }
+
+        soundPool = SoundPool(5, AudioManager.STREAM_MUSIC, 0)
+        soundPool!!.load(baseContext, R.raw.button_click, 1)
+    }
+}
+
+
+/**
+ * Plays a click (assuming that the preferences allow it)
+ */
+fun click() {
+    if (mainViewModel.clickOn.value) {
+        soundPool?.play(CLICK_SOUND_ID, 1f, 1f, 0, 0, 1f)
     }
 }
 
@@ -193,6 +213,7 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                         containerColor = MaterialTheme.colorScheme.onSecondaryContainer
                     ),
                     onClick = {
+                        click()
                         mainViewModel.nextState(BUTTON_START_STOP)
                         Log.d(TAG, "start button click")
                 }) {
@@ -219,6 +240,7 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                     ),
                     enabled = stopwatchState.value != START_STATE,
                     onClick = {
+                        click()
                         mainViewModel.nextState(BUTTON_SPLIT_CLEAR)
                         Log.d(TAG, "split button click")
                 }) {
@@ -339,8 +361,6 @@ fun AutoSizeText(
                 scaledTextStyle =
                     scaledTextStyle.copy(fontSize = scaledTextStyle.fontSize * 0.9)
             } else {
-                current_fontsize = scaledTextStyle.fontSize
-                Log.d(TAG, "font size = $current_fontsize")
                 readyToDraw = true
             }
         }
@@ -360,3 +380,5 @@ private const val BUTTON_STOP_TEXT = "STOP"
 
 private const val BUTTON_SPLIT_TEXT = "SPLIT"
 private const val BUTTON_CLEAR_TEXT = "CLEAR"
+
+private const val CLICK_SOUND_ID = 1
