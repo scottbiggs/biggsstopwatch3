@@ -352,7 +352,7 @@ fun MainDisplay(mainViewModel : MainViewModel) {
             )
 
             // split time
-            val splitTime = stopwatchSplit.value - stopwatchStart.value
+            val splitTime = stopwatchSplit.value
             val splitString = getDisplayTime(splitTime)
             if ((stopwatchState.value == SPLIT_RUNNING_STATE) ||
                 (stopwatchState.value == SPLIT_STOPPED_STATE)) {
