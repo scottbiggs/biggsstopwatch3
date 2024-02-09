@@ -8,7 +8,10 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,8 +22,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,16 +38,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.Typeface
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.BUTTON_SPLIT_CLEAR
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.BUTTON_START_STOP
@@ -65,8 +82,6 @@ import com.sleepfuriously.biggsstopwatch3.ui.theme.BiggsStopwatch3Theme
 // Should be a constant, but need to get it from strings.xml
 lateinit var testString : String
 
-//var current_fontsize = 0.sp
-
 /** access to the view model */
 private lateinit var mainViewModel: MainViewModel
 
@@ -83,8 +98,6 @@ class MainActivity : ComponentActivity() {
     //-------------------
     //  properties
     //-------------------
-
-
 
     //-------------------
     //  class functions
@@ -183,8 +196,17 @@ fun MainDisplay(mainViewModel : MainViewModel) {
     val stopwatchSplit = mainViewModel.stopwatchSplit
     val tick = mainViewModel.tick
 
+    val portraitMode = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
-    BiggsStopwatch3Theme {
+    val ctx = LocalContext.current
+    val stopwatchFontFamily = remember {
+        FontFamily(
+            typeface = ResourcesCompat.getFont(ctx,
+                R.font.alarm_clock)!!
+        )
+    }
+
+        BiggsStopwatch3Theme {
 
         // box background for entire drawing.  Also the buttons will be at the
         // bottom of this box.
@@ -265,28 +287,51 @@ fun MainDisplay(mainViewModel : MainViewModel) {
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(horizontal = 8.dp)
         ) {
+
+
 
             // line for the top of the main display
             val mainDisplayGuide = createGuidelineFromTop(
                 if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    0.35f   // about a third down for portrait mode
+                    0.33f   // about a third down for portrait mode
                 }
                 else {
                     0f      // keep this at top for landscape mode
                 }
-
             )
 
             // names for the constrained widgets
             val (
-                mainTimer, splitTimer
+                mainTimer, splitTimer, settingsButton
             ) = createRefs()
 
+            // settings menu
+            IconButton(
+                onClick = {
+                    // todo: action on the button click
+                    Log.d(TAG, "icon button clicked")
+                },
+                modifier = Modifier
+                    .constrainAs(settingsButton) {
+                        top.linkTo(parent.top)
+                        end.linkTo(parent.end, 8.dp)
+                    }
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.menu_dark_mode),
+                    tint = if (isSystemInDarkTheme()) Color.White else Color.Black,
+                    contentDescription = null,
+                )
+            }
+
+
+            // main display
             AutoSizeText(
                 text = getDisplayTime(tick.value),
                 textStyle = TextStyle(
+                    fontFamily = stopwatchFontFamily,
                     fontSize = 240.sp,
                     color = if (isSystemInDarkTheme()) Color.White else Color.Black,
                     shadow = Shadow(
@@ -297,9 +342,12 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                 ),
                 modifier = Modifier
                     .constrainAs(mainTimer) {
+                        top.linkTo(if (portraitMode)
+                                        mainDisplayGuide
+                                   else
+                                        settingsButton.bottom)
                         start.linkTo(parent.start, 16.dp)
                         end.linkTo(parent.end, 16.dp)
-                        top.linkTo(mainDisplayGuide)
                     }
             )
 
@@ -311,12 +359,13 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                 Text(
                     splitString,
                     fontSize = 40.sp,
+                    fontFamily = stopwatchFontFamily,
                     textAlign = TextAlign.End,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .constrainAs(splitTimer) {
                         end.linkTo(mainTimer.end)
-                        top.linkTo(mainTimer.bottom, 16.dp)
+                        top.linkTo(mainTimer.bottom)
                         }
                 )
             }
