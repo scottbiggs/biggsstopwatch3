@@ -1,17 +1,12 @@
 package com.sleepfuriously.biggsstopwatch3
 
 import android.content.res.Configuration
-import android.media.AudioManager
-import android.media.MediaPlayer
 import android.media.SoundPool
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,9 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -38,20 +30,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.Typeface
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -115,7 +102,10 @@ class MainActivity : ComponentActivity() {
             MainDisplay(mainViewModel = mainViewModel)
         }
 
-        soundPool = SoundPool(5, AudioManager.STREAM_MUSIC, 0)
+        // set the sound system
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(5)
+            .build()
         soundPool!!.load(baseContext, R.raw.button_click, 1)
     }
 }
@@ -192,7 +182,6 @@ fun getDisplayTime(millis : Long) : String {
 fun MainDisplay(mainViewModel : MainViewModel) {
 
     val stopwatchState = mainViewModel.stopwatchState
-    val stopwatchStart = mainViewModel.stopwatchStart
     val stopwatchSplit = mainViewModel.stopwatchSplit
     val tick = mainViewModel.tick
 

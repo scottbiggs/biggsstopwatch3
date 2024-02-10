@@ -42,10 +42,8 @@ class MainViewModel : ViewModel() {
     /**
      * The time (in millis since jan 1, 1970) the start button was last pushed.
      */
-//    val stopwatchStart: MutableLiveData<Long> by lazy {
-//        MutableLiveData<Long>()
-//    }
-    val stopwatchStart: MutableState<Long> = mutableLongStateOf(0L)
+//    val stopwatchStart: MutableState<Long> = mutableLongStateOf(0L)
+    var stopwatchStart = 0L
 
     /**
      * Whenever the STOP button is pushed, the current time minus [stopwatchStart]
@@ -83,7 +81,7 @@ class MainViewModel : ViewModel() {
                 (stopwatchState.value == SPLIT_RUNNING_STATE)) {
                 // this should activate the observer in the main view
                 tick.value = (SystemClock.elapsedRealtime()
-                        - stopwatchStart.value
+                        - stopwatchStart
                         + elapsedTime.value)
             }
         }
@@ -97,11 +95,6 @@ class MainViewModel : ViewModel() {
     //-------------------------
     //  functions
     //-------------------------
-
-    init {
-        // todo Load up prefs
-        //
-    }
 
     /**
      * Here is the table for state changes:
@@ -155,9 +148,9 @@ class MainViewModel : ViewModel() {
             START_STATE -> {
                 if (buttonId == BUTTON_START_STOP) {    // START -> RUNNING_STATE
                     stopwatchState.value = RUNNING_STATE
-                    stopwatchStart.value = SystemClock.elapsedRealtime()
+                    stopwatchStart = SystemClock.elapsedRealtime()
                     timer.start()
-                    Log.d(TAG, "START_STATE -> START, timer starting, stopwatchState = ${stopwatchState.value}, stopwatchStart = ${stopwatchStart.value}")
+                    Log.d(TAG, "START_STATE -> START, timer starting, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
                 }
                 else {  // BUTTON_SPLIT_CLEAR           N/A
                     Log.e(TAG, "Error: split/clear button active in START_STATE!!!")
@@ -169,60 +162,60 @@ class MainViewModel : ViewModel() {
             RUNNING_STATE -> {
                 if (buttonId == BUTTON_START_STOP) {    // STOP -> STOPPED_STATE
                     stopwatchState.value = STOPPED_STATE
-                    elapsedTime.value += SystemClock.elapsedRealtime() - stopwatchStart.value   // add latest run batch
+                    elapsedTime.value += SystemClock.elapsedRealtime() - stopwatchStart   // add latest run batch
                     timer.cancel()
-                    Log.d(TAG, "RUNNING_STATE -> STOP, timer canceling, stopwatchState = ${stopwatchState.value}, stopwatchStart = ${stopwatchStart.value}")
+                    Log.d(TAG, "RUNNING_STATE -> STOP, timer canceling, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
                 }
                 else {  // BUTTON_SPLIT_CLEAR           SPLIT -> SPLIT_RUNNING_STATE
                     stopwatchState.value = SPLIT_RUNNING_STATE
-                    stopwatchSplit.value = elapsedTime.value + (SystemClock.elapsedRealtime() - stopwatchStart.value)
-                    Log.d(TAG, "RUNNING_STATE -> SPLIT, stopwatchState = ${stopwatchState.value}, stopwatchStart = ${stopwatchStart.value}")
+                    stopwatchSplit.value = elapsedTime.value + (SystemClock.elapsedRealtime() - stopwatchStart)
+                    Log.d(TAG, "RUNNING_STATE -> SPLIT, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
                 }
             }
 
             STOPPED_STATE -> {
                 if (buttonId == BUTTON_START_STOP) {    // START -> RUNNING_STATE
                     stopwatchState.value = RUNNING_STATE
-                    stopwatchStart.value = SystemClock.elapsedRealtime()
+                    stopwatchStart = SystemClock.elapsedRealtime()
                     timer.start()
-                    Log.d(TAG, "STOPPED_STATE -> START, timer starting, stopwatchState = ${stopwatchState.value}, stopwatchStart = ${stopwatchStart.value}")
+                    Log.d(TAG, "STOPPED_STATE -> START, timer starting, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
                 }
                 else {  // BUTTON_SPLIT_CLEAR           CLEAR -> START_STATE
                     stopwatchState.value = START_STATE
                     stopwatchSplit.value = 0L
                     elapsedTime.value = 0L
                     tick.value = 0L
-                    Log.d(TAG, "STOPPED_STATE -> CLEAR, stopwatchState = ${stopwatchState.value}, stopwatchStart = ${stopwatchStart.value}")
+                    Log.d(TAG, "STOPPED_STATE -> CLEAR, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
                 }
             }
 
             SPLIT_RUNNING_STATE -> {
                 if (buttonId == BUTTON_START_STOP) {    // STOP -> SPLIT_STOPPED_STATE
                     stopwatchState.value = SPLIT_STOPPED_STATE
-                    elapsedTime.value += SystemClock.elapsedRealtime() - stopwatchStart.value
+                    elapsedTime.value += SystemClock.elapsedRealtime() - stopwatchStart
                     timer.cancel()
-                    Log.d(TAG, "SPLIT_RUNNING_STATE -> START, timer canceling, stopwatchState = ${stopwatchState.value}, stopwatchStart = ${stopwatchStart.value}")
+                    Log.d(TAG, "SPLIT_RUNNING_STATE -> START, timer canceling, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
                 }
                 else {  // BUTTON_SPLIT_CLEAR           // SPLIT -> SPLIT_RUNNING_STATE (no change)
                     Log.d(TAG, "hitting split button again")
-                    stopwatchSplit.value = elapsedTime.value + (SystemClock.elapsedRealtime() - stopwatchStart.value)
-                    Log.d(TAG, "SPLIT_RUNNING_STATE -> SPLIT, stopwatchState = ${stopwatchState.value}, stopwatchStart = ${stopwatchStart.value}")
+                    stopwatchSplit.value = elapsedTime.value + (SystemClock.elapsedRealtime() - stopwatchStart)
+                    Log.d(TAG, "SPLIT_RUNNING_STATE -> SPLIT, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
                 }
             }
 
             SPLIT_STOPPED_STATE -> {
                 if (buttonId == BUTTON_START_STOP) {    // START -> SPLIT_RUNNING_STATE
                     stopwatchState.value = SPLIT_RUNNING_STATE
-                    stopwatchStart.value = SystemClock.elapsedRealtime()
+                    stopwatchStart = SystemClock.elapsedRealtime()
                     timer.start()
-                    Log.d(TAG, "SPLIT_STOPPED_STATE -> START, timer starting, stopwatchState = ${stopwatchState.value}, stopwatchStart = ${stopwatchStart.value}")
+                    Log.d(TAG, "SPLIT_STOPPED_STATE -> START, timer starting, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
                 }
                 else {  // BUTTON_SPLIT_CLEAR           CLEAR -> START_STATE
                     stopwatchState.value = START_STATE
                     elapsedTime.value = 0L
                     tick.value = 0L
                     stopwatchSplit.value = 0L
-                    Log.d(TAG, "SPLIT_STOPPED_STATE -> CLEAR, stopwatchState = ${stopwatchState.value}, stopwatchStart = ${stopwatchStart.value}")
+                    Log.d(TAG, "SPLIT_STOPPED_STATE -> CLEAR, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
                 }
             }
 
@@ -234,7 +227,7 @@ class MainViewModel : ViewModel() {
         }
 
         Log.d(TAG, "nextState() moved from ${STATE_NAMES[prevState]} to ${STATE_NAMES[stopwatchState.value]}")
-        Log.d(TAG, "   start time = ${stopwatchStart.value}, elapsed time = ${elapsedTime.value}, split time = ${stopwatchSplit.value}")
+        Log.d(TAG, "   start time = ${stopwatchStart}, elapsed time = ${elapsedTime.value}, split time = ${stopwatchSplit.value}")
         return stopwatchState.value
     }
 
