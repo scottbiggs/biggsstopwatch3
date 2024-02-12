@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.media.SoundPool
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -16,8 +17,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +49,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -293,13 +303,15 @@ fun MainDisplay(mainViewModel : MainViewModel) {
 
             // names for the constrained widgets
             val (
-                mainTimer, splitTimer, settingsButton
+                mainTimer, splitTimer, settingsButton, dropdownTest
             ) = createRefs()
+
+            MyDropdownMenu()
 
             // settings menu
             IconButton(
                 onClick = {
-                    // todo: action on the button click
+                    Toast.makeText(ctx, "iconbutton click!", Toast.LENGTH_SHORT).show()
                     Log.d(TAG, "icon button clicked")
                 },
                 modifier = Modifier
@@ -404,6 +416,96 @@ fun AutoSizeText(
         }
     )
 
+}
+
+/**
+ * Displays a dropdown menu button (the 3 dots in vertical column) and
+ * handles the menu selection results.
+ *
+ * side effects
+ *      mainViewmodel.clickOn
+ *      mainViewmodel.stayOn
+ *      mainViewmodel.vibrateOn
+ */
+@Composable
+fun MyDropdownMenu() {
+    val context = LocalContext.current
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentSize(Alignment.TopStart)
+    ) {
+        IconButton(onClick = { expanded = !expanded }) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "settings"
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        if (mainViewModel.clickOn.value)
+                            "Sound Enabled"
+                        else
+                            "Sound Disabled"
+                    )
+                },
+                onClick = {
+                    mainViewModel.toggleSound()
+                    val str = if (mainViewModel.clickOn.value) "now playing" else "turned off"
+                    Toast.makeText(context, "Sound is $str", Toast.LENGTH_LONG).show()
+                    expanded = false        // closes the menu
+                }
+            )
+
+            Divider()
+
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        if (mainViewModel.stayOn.value)
+                            "screen saver Disabled"
+                        else
+                            "screen saver Enabled"
+                    )
+                },
+                onClick = {
+                    mainViewModel.toggleStayOn()
+                    val str = if (mainViewModel.stayOn.value) "never engage" else "work normally"
+                    Toast.makeText(context, "Screen saver will $str", Toast.LENGTH_SHORT).show()
+                    expanded = false
+                }
+            )
+
+            Divider()
+
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        if (mainViewModel.vibrateOn.value)
+                            "vibrate Enabled"
+                        else
+                            "vibrate Disabled"
+                    )
+                },
+                onClick = {
+                    mainViewModel.toggleVibrateOn()
+                    val str = if (mainViewModel.vibrateOn.value) "on" else "off"
+                    Toast.makeText(context, "Vibration is turned $str", Toast.LENGTH_LONG).show()
+                    expanded = false
+                }
+            )
+
+        }
+
+    }
 }
 
 

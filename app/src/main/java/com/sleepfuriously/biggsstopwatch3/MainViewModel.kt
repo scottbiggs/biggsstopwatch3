@@ -67,6 +67,17 @@ class MainViewModel : ViewModel() {
     val clickOn: MutableState<Boolean> = mutableStateOf(true)
 
     /**
+     * When TRUE, this app will keep the screen from turning off.
+     * Default is FALSE.
+     */
+    val stayOn: MutableState<Boolean> = mutableStateOf(false)
+
+    /**
+     * When TRUE, the phone will vibrate when a button is pressed.
+     */
+    val vibrateOn: MutableState<Boolean> = mutableStateOf(true)
+
+    /**
      * Signals to the Activity that a tick has occurred.  It will actually
      * contain the number of milliseconds since [stopwatchStart].
      */
@@ -229,6 +240,21 @@ class MainViewModel : ViewModel() {
         Log.d(TAG, "nextState() moved from ${STATE_NAMES[prevState]} to ${STATE_NAMES[stopwatchState.value]}")
         Log.d(TAG, "   start time = ${stopwatchStart}, elapsed time = ${elapsedTime.value}, split time = ${stopwatchSplit.value}")
         return stopwatchState.value
+    }
+
+    /**
+     * If the sound is disabled, enable it.  And vice-versa.
+     */
+    fun toggleSound() {
+        clickOn.value = !clickOn.value
+    }
+
+    fun toggleStayOn() {
+        stayOn.value = !stayOn.value
+    }
+
+    fun toggleVibrateOn() {
+        vibrateOn.value = !vibrateOn.value
     }
 
 //-------------------------
