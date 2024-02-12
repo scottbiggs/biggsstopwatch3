@@ -17,10 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ButtonDefaults
@@ -45,11 +42,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -303,29 +298,16 @@ fun MainDisplay(mainViewModel : MainViewModel) {
 
             // names for the constrained widgets
             val (
-                mainTimer, splitTimer, settingsButton, dropdownTest
+                mainTimer, splitTimer, dropdownMenu
             ) = createRefs()
 
-            MyDropdownMenu()
-
             // settings menu
-            IconButton(
-                onClick = {
-                    Toast.makeText(ctx, "iconbutton click!", Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, "icon button clicked")
-                },
-                modifier = Modifier
-                    .constrainAs(settingsButton) {
-                        top.linkTo(parent.top)
-                        end.linkTo(parent.end, 8.dp)
-                    }
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.menu_dark_mode),
-                    tint = if (isSystemInDarkTheme()) Color.White else Color.Black,
-                    contentDescription = null,
-                )
-            }
+            MyDropdownMenu(modifier = Modifier
+                .constrainAs(dropdownMenu) {
+                    top.linkTo(parent.top)
+                    end.linkTo(parent.end)
+                }
+            )
 
 
             // main display
@@ -346,7 +328,7 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                         top.linkTo(if (portraitMode)
                                         mainDisplayGuide
                                    else
-                                        settingsButton.bottom)
+                                        dropdownMenu.bottom)
                         start.linkTo(parent.start, 16.dp)
                         end.linkTo(parent.end, 16.dp)
                     }
@@ -422,24 +404,26 @@ fun AutoSizeText(
  * Displays a dropdown menu button (the 3 dots in vertical column) and
  * handles the menu selection results.
  *
+ * @param   modifier        Compose modifier.  I expect this to be done
+ *                          through a constraint layout, so
+ *                          all the constraints will be here.
+ *
  * side effects
  *      mainViewmodel.clickOn
  *      mainViewmodel.stayOn
  *      mainViewmodel.vibrateOn
  */
 @Composable
-fun MyDropdownMenu() {
+fun MyDropdownMenu(modifier: Modifier) {
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentSize(Alignment.TopStart)
-    ) {
+    Box(modifier = modifier)
+    {
         IconButton(onClick = { expanded = !expanded }) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
+                tint = if (isSystemInDarkTheme()) Color.White else Color.Black,
                 contentDescription = "settings"
             )
         }
