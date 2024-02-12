@@ -284,7 +284,10 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                 .padding(horizontal = 8.dp)
         ) {
 
-
+            // names for the constrained widgets
+            val (
+                mainTimer, splitTimer, dropdownMenu
+            ) = createRefs()
 
             // line for the top of the main display
             val mainDisplayGuide = createGuidelineFromTop(
@@ -295,11 +298,6 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                     0f      // keep this at top for landscape mode
                 }
             )
-
-            // names for the constrained widgets
-            val (
-                mainTimer, splitTimer, dropdownMenu
-            ) = createRefs()
 
             // settings menu
             MyDropdownMenu(modifier = Modifier
