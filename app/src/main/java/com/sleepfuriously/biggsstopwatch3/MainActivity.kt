@@ -120,7 +120,7 @@ class MainActivity : ComponentActivity() {
  * Plays a click (assuming that the preferences allow it)
  */
 fun click() {
-    if (mainViewModel.clickOn.value) {
+    if (mainViewModel.clickOn) {
         soundPool?.play(CLICK_SOUND_ID, 1f, 1f, 0, 0, 1f)
     }
 }
@@ -186,10 +186,6 @@ fun getDisplayTime(millis : Long) : String {
 @Composable
 fun MainDisplay(mainViewModel : MainViewModel) {
 
-    val stopwatchState = mainViewModel.stopwatchState
-    val stopwatchSplit = mainViewModel.stopwatchSplit
-    val tick = mainViewModel.tick
-
     val portraitMode = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
     val ctx = LocalContext.current
@@ -234,7 +230,7 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                         Log.d(TAG, "start button click")
                 }) {
                     val startStopButtonTxt =
-                        when (stopwatchState.value) {
+                        when (mainViewModel.stopwatchState) {
                             START_STATE -> BUTTON_START_TEXT
                             RUNNING_STATE -> BUTTON_STOP_TEXT
                             STOPPED_STATE -> BUTTON_START_TEXT
@@ -254,14 +250,14 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.onTertiaryContainer
                     ),
-                    enabled = stopwatchState.value != START_STATE,
+                    enabled = mainViewModel.stopwatchState != START_STATE,
                     onClick = {
                         click()
                         mainViewModel.nextState(BUTTON_SPLIT_CLEAR)
                         Log.d(TAG, "split button click")
                 }) {
                     val splitClearButtonTxt =
-                        when (stopwatchState.value) {
+                        when (mainViewModel.stopwatchState) {
                             START_STATE -> ""
                             RUNNING_STATE -> BUTTON_SPLIT_TEXT
                             STOPPED_STATE -> BUTTON_CLEAR_TEXT
@@ -310,7 +306,7 @@ fun MainDisplay(mainViewModel : MainViewModel) {
 
             // main display
             AutoSizeText(
-                text = getDisplayTime(tick.value),
+                text = getDisplayTime(mainViewModel.tick),
                 textStyle = TextStyle(
                     fontFamily = stopwatchFontFamily,
                     fontSize = 240.sp,
@@ -333,10 +329,9 @@ fun MainDisplay(mainViewModel : MainViewModel) {
             )
 
             // split time
-            val splitTime = stopwatchSplit.value
-            val splitString = getDisplayTime(splitTime)
-            if ((stopwatchState.value == SPLIT_RUNNING_STATE) ||
-                (stopwatchState.value == SPLIT_STOPPED_STATE)) {
+            val splitString = getDisplayTime(mainViewModel.stopwatchSplit)
+            if ((mainViewModel.stopwatchState == SPLIT_RUNNING_STATE) ||
+                (mainViewModel.stopwatchState == SPLIT_STOPPED_STATE)) {
                 Text(
                     splitString,
                     fontSize = 40.sp,
@@ -433,7 +428,7 @@ fun MyDropdownMenu(modifier: Modifier) {
             DropdownMenuItem(
                 text = {
                     Text(
-                        if (mainViewModel.clickOn.value)
+                        if (mainViewModel.clickOn)
                             "Sound Enabled"
                         else
                             "Sound Disabled"
@@ -441,7 +436,7 @@ fun MyDropdownMenu(modifier: Modifier) {
                 },
                 onClick = {
                     mainViewModel.toggleSound()
-                    val str = if (mainViewModel.clickOn.value) "now playing" else "turned off"
+                    val str = if (mainViewModel.clickOn) "now playing" else "turned off"
                     Toast.makeText(context, "Sound is $str", Toast.LENGTH_LONG).show()
                     expanded = false        // closes the menu
                 }
@@ -452,7 +447,7 @@ fun MyDropdownMenu(modifier: Modifier) {
             DropdownMenuItem(
                 text = {
                     Text(
-                        if (mainViewModel.stayOn.value)
+                        if (mainViewModel.stayOn)
                             "screen saver Disabled"
                         else
                             "screen saver Enabled"
@@ -460,7 +455,7 @@ fun MyDropdownMenu(modifier: Modifier) {
                 },
                 onClick = {
                     mainViewModel.toggleStayOn()
-                    val str = if (mainViewModel.stayOn.value) "never engage" else "work normally"
+                    val str = if (mainViewModel.stayOn) "never engage" else "work normally"
                     Toast.makeText(context, "Screen saver will $str", Toast.LENGTH_SHORT).show()
                     expanded = false
                 }
@@ -471,7 +466,7 @@ fun MyDropdownMenu(modifier: Modifier) {
             DropdownMenuItem(
                 text = {
                     Text(
-                        if (mainViewModel.vibrateOn.value)
+                        if (mainViewModel.vibrateOn)
                             "vibrate Enabled"
                         else
                             "vibrate Disabled"
@@ -479,7 +474,7 @@ fun MyDropdownMenu(modifier: Modifier) {
                 },
                 onClick = {
                     mainViewModel.toggleVibrateOn()
-                    val str = if (mainViewModel.vibrateOn.value) "on" else "off"
+                    val str = if (mainViewModel.vibrateOn) "on" else "off"
                     Toast.makeText(context, "Vibration is turned $str", Toast.LENGTH_LONG).show()
                     expanded = false
                 }

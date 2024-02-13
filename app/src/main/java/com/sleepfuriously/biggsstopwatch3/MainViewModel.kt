@@ -4,9 +4,11 @@ import android.os.CountDownTimer
 import android.os.SystemClock
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
 
@@ -32,7 +34,8 @@ class MainViewModel : ViewModel() {
 //    val stopwatchState: StateFlow<Int> = savedStateHandle.getStateFlow(STATE_HANDLE_KEY, START_STATE)   // stateflow version
 
     // mutable state (compose state) which was designed specifically for jetpack compose
-    val stopwatchState: MutableState<Int> = mutableIntStateOf(START_STATE)
+    var stopwatchState by mutableIntStateOf(START_STATE)
+        private set
 
     // another way of doing above
 //    var stopwatchState2 by mutableStateOf(START_STATE)
@@ -43,7 +46,7 @@ class MainViewModel : ViewModel() {
      * The time (in millis since jan 1, 1970) the start button was last pushed.
      */
 //    val stopwatchStart: MutableState<Long> = mutableLongStateOf(0L)
-    var stopwatchStart = 0L
+    private var stopwatchStart = 0L
 
     /**
      * Whenever the STOP button is pushed, the current time minus [stopwatchStart]
@@ -51,7 +54,8 @@ class MainViewModel : ViewModel() {
      * that have been timed and completed.  It is only reset when the CLEAR button
      * is pressed.
      */
-    private val elapsedTime: MutableState<Long> = mutableLongStateOf(0L)
+    private var elapsedTime by mutableLongStateOf(0L)
+        private set
 
     /**
      * The time the split button was pushed.
@@ -59,41 +63,47 @@ class MainViewModel : ViewModel() {
 //    val stopwatchSplit: MutableLiveData<Long> by lazy {
 //        MutableLiveData<Long>()
 //    }
-    val stopwatchSplit: MutableState<Long> = mutableLongStateOf(0L)
+    var stopwatchSplit by mutableLongStateOf(0L)
+        private set
 
     /**
      * When TRUE, clicks are played on button taps.
      */
-    val clickOn: MutableState<Boolean> = mutableStateOf(true)
+    var clickOn by mutableStateOf(true)
+        private set
 
     /**
      * When TRUE, this app will keep the screen from turning off.
      * Default is FALSE.
      */
-    val stayOn: MutableState<Boolean> = mutableStateOf(false)
+    var stayOn by mutableStateOf(false)
+        private set
 
     /**
      * When TRUE, the phone will vibrate when a button is pressed.
      */
-    val vibrateOn: MutableState<Boolean> = mutableStateOf(true)
+    var vibrateOn by mutableStateOf(true)
+        private set
 
     /**
      * Signals to the Activity that a tick has occurred.  It will actually
      * contain the number of milliseconds since [stopwatchStart].
      */
-    var tick: MutableState<Long> = mutableLongStateOf(0L)
+    var tick by mutableLongStateOf(0L)
+        private set
+
 
     /**
      * This is what makes the stopwatch tick.
      */
     private val timer = object : CountDownTimer(Long.MAX_VALUE, 30) {
         override fun onTick(millisUntilFinished: Long) {
-            if ((stopwatchState.value == RUNNING_STATE) ||
-                (stopwatchState.value == SPLIT_RUNNING_STATE)) {
+            if ((stopwatchState == RUNNING_STATE) ||
+                (stopwatchState == SPLIT_RUNNING_STATE)) {
                 // this should activate the observer in the main view
-                tick.value = (SystemClock.elapsedRealtime()
+                tick = (SystemClock.elapsedRealtime()
                         - stopwatchStart
-                        + elapsedTime.value)
+                        + elapsedTime)
             }
         }
 
@@ -143,118 +153,118 @@ class MainViewModel : ViewModel() {
         // check for invalid button id
         if ((buttonId != BUTTON_SPLIT_CLEAR) and (buttonId != BUTTON_START_STOP)) {
             Log.e(TAG, "unknown button in nextState(button = $buttonId)!")
-            stopwatchState.value = ERROR_STATE
-            return stopwatchState.value
+            stopwatchState = ERROR_STATE
+            return stopwatchState
         }
 
 
         // At the end of this function, the current state may change. Save the
         // old value for our debug statement.
-        val prevState = stopwatchState.value
+        val prevState = stopwatchState
 
         // Depending on the current state and which button was hit, we move
         // to the next state.
-        when (stopwatchState.value) {
+        when (stopwatchState) {
 
             START_STATE -> {
                 if (buttonId == BUTTON_START_STOP) {    // START -> RUNNING_STATE
-                    stopwatchState.value = RUNNING_STATE
+                    stopwatchState = RUNNING_STATE
                     stopwatchStart = SystemClock.elapsedRealtime()
                     timer.start()
-                    Log.d(TAG, "START_STATE -> START, timer starting, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
+                    Log.d(TAG, "START_STATE -> START, timer starting, stopwatchState = ${stopwatchState}, stopwatchStart = $stopwatchStart")
                 }
                 else {  // BUTTON_SPLIT_CLEAR           N/A
                     Log.e(TAG, "Error: split/clear button active in START_STATE!!!")
-                    stopwatchState.value = ERROR_STATE
+                    stopwatchState = ERROR_STATE
                     timer.cancel()
                 }
             }
 
             RUNNING_STATE -> {
                 if (buttonId == BUTTON_START_STOP) {    // STOP -> STOPPED_STATE
-                    stopwatchState.value = STOPPED_STATE
-                    elapsedTime.value += SystemClock.elapsedRealtime() - stopwatchStart   // add latest run batch
+                    stopwatchState = STOPPED_STATE
+                    elapsedTime += SystemClock.elapsedRealtime() - stopwatchStart   // add latest run batch
                     timer.cancel()
-                    Log.d(TAG, "RUNNING_STATE -> STOP, timer canceling, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
+                    Log.d(TAG, "RUNNING_STATE -> STOP, timer canceling, stopwatchState = ${stopwatchState}, stopwatchStart = $stopwatchStart")
                 }
                 else {  // BUTTON_SPLIT_CLEAR           SPLIT -> SPLIT_RUNNING_STATE
-                    stopwatchState.value = SPLIT_RUNNING_STATE
-                    stopwatchSplit.value = elapsedTime.value + (SystemClock.elapsedRealtime() - stopwatchStart)
-                    Log.d(TAG, "RUNNING_STATE -> SPLIT, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
+                    stopwatchState = SPLIT_RUNNING_STATE
+                    stopwatchSplit = elapsedTime + (SystemClock.elapsedRealtime() - stopwatchStart)
+                    Log.d(TAG, "RUNNING_STATE -> SPLIT, stopwatchState = ${stopwatchState}, stopwatchStart = $stopwatchStart")
                 }
             }
 
             STOPPED_STATE -> {
                 if (buttonId == BUTTON_START_STOP) {    // START -> RUNNING_STATE
-                    stopwatchState.value = RUNNING_STATE
+                    stopwatchState = RUNNING_STATE
                     stopwatchStart = SystemClock.elapsedRealtime()
                     timer.start()
-                    Log.d(TAG, "STOPPED_STATE -> START, timer starting, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
+                    Log.d(TAG, "STOPPED_STATE -> START, timer starting, stopwatchState = ${stopwatchState}, stopwatchStart = $stopwatchStart")
                 }
                 else {  // BUTTON_SPLIT_CLEAR           CLEAR -> START_STATE
-                    stopwatchState.value = START_STATE
-                    stopwatchSplit.value = 0L
-                    elapsedTime.value = 0L
-                    tick.value = 0L
-                    Log.d(TAG, "STOPPED_STATE -> CLEAR, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
+                    stopwatchState = START_STATE
+                    stopwatchSplit = 0L
+                    elapsedTime = 0L
+                    tick = 0L
+                    Log.d(TAG, "STOPPED_STATE -> CLEAR, stopwatchState = ${stopwatchState}, stopwatchStart = $stopwatchStart")
                 }
             }
 
             SPLIT_RUNNING_STATE -> {
                 if (buttonId == BUTTON_START_STOP) {    // STOP -> SPLIT_STOPPED_STATE
-                    stopwatchState.value = SPLIT_STOPPED_STATE
-                    elapsedTime.value += SystemClock.elapsedRealtime() - stopwatchStart
+                    stopwatchState = SPLIT_STOPPED_STATE
+                    elapsedTime += SystemClock.elapsedRealtime() - stopwatchStart
                     timer.cancel()
-                    Log.d(TAG, "SPLIT_RUNNING_STATE -> START, timer canceling, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
+                    Log.d(TAG, "SPLIT_RUNNING_STATE -> START, timer canceling, stopwatchState = ${stopwatchState}, stopwatchStart = $stopwatchStart")
                 }
                 else {  // BUTTON_SPLIT_CLEAR           // SPLIT -> SPLIT_RUNNING_STATE (no change)
                     Log.d(TAG, "hitting split button again")
-                    stopwatchSplit.value = elapsedTime.value + (SystemClock.elapsedRealtime() - stopwatchStart)
-                    Log.d(TAG, "SPLIT_RUNNING_STATE -> SPLIT, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
+                    stopwatchSplit = elapsedTime + (SystemClock.elapsedRealtime() - stopwatchStart)
+                    Log.d(TAG, "SPLIT_RUNNING_STATE -> SPLIT, stopwatchState = ${stopwatchState}, stopwatchStart = $stopwatchStart")
                 }
             }
 
             SPLIT_STOPPED_STATE -> {
                 if (buttonId == BUTTON_START_STOP) {    // START -> SPLIT_RUNNING_STATE
-                    stopwatchState.value = SPLIT_RUNNING_STATE
+                    stopwatchState = SPLIT_RUNNING_STATE
                     stopwatchStart = SystemClock.elapsedRealtime()
                     timer.start()
-                    Log.d(TAG, "SPLIT_STOPPED_STATE -> START, timer starting, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
+                    Log.d(TAG, "SPLIT_STOPPED_STATE -> START, timer starting, stopwatchState = ${stopwatchState}, stopwatchStart = $stopwatchStart")
                 }
                 else {  // BUTTON_SPLIT_CLEAR           CLEAR -> START_STATE
-                    stopwatchState.value = START_STATE
-                    elapsedTime.value = 0L
-                    tick.value = 0L
-                    stopwatchSplit.value = 0L
-                    Log.d(TAG, "SPLIT_STOPPED_STATE -> CLEAR, stopwatchState = ${stopwatchState.value}, stopwatchStart = $stopwatchStart")
+                    stopwatchState = START_STATE
+                    elapsedTime = 0L
+                    tick = 0L
+                    stopwatchSplit = 0L
+                    Log.d(TAG, "SPLIT_STOPPED_STATE -> CLEAR, stopwatchState = ${stopwatchState}, stopwatchStart = $stopwatchStart")
                 }
             }
 
             else -> {
-                Log.e(TAG, "Unknown state of ${stopwatchState.value} in nextState()!")
-                stopwatchState.value = ERROR_STATE
+                Log.e(TAG, "Unknown state of ${stopwatchState} in nextState()!")
+                stopwatchState = ERROR_STATE
                 timer.cancel()
             }
         }
 
-        Log.d(TAG, "nextState() moved from ${STATE_NAMES[prevState]} to ${STATE_NAMES[stopwatchState.value]}")
-        Log.d(TAG, "   start time = ${stopwatchStart}, elapsed time = ${elapsedTime.value}, split time = ${stopwatchSplit.value}")
-        return stopwatchState.value
+        Log.d(TAG, "nextState() moved from ${STATE_NAMES[prevState]} to ${STATE_NAMES[stopwatchState]}")
+        Log.d(TAG, "   start time = ${stopwatchStart}, elapsed time = ${elapsedTime}, split time = ${stopwatchSplit}")
+        return stopwatchState
     }
 
     /**
      * If the sound is disabled, enable it.  And vice-versa.
      */
     fun toggleSound() {
-        clickOn.value = !clickOn.value
+        clickOn = !clickOn
     }
 
     fun toggleStayOn() {
-        stayOn.value = !stayOn.value
+        stayOn = !stayOn
     }
 
     fun toggleVibrateOn() {
-        vibrateOn.value = !vibrateOn.value
+        vibrateOn = !vibrateOn
     }
 
 //-------------------------
@@ -287,12 +297,7 @@ class MainViewModel : ViewModel() {
             "SPLIT_RUNNING",
             "SPLIT_STOPPED"
             )
-
     }
-
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //  inner classes
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 }
 
