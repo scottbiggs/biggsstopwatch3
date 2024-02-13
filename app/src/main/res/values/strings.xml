@@ -1,4 +1,26 @@
 <resources>
     <string name="app_name">Biggs Stopwatch 3</string>
     <string name="test_string">88:88:88.88</string>
+
+    <!--
+        settings menu
+        The name of the settings corresponds to the current state,
+        that is: the state that currently exists.  So if sound is
+        currently playing, then the correct menu item is "turn sound off."
+    -->
+    <string name="settings_menu_sound_on">Turn Sound OFF</string>
+    <string name="settings_menu_sound_off">Turn Sound ON</string>
+
+    <string name="settings_menu_vibrate_on">Turn Vibrate OFF</string>
+    <string name="settings_menu_vibrate_off">Turn Vibrate ON</string>
+
+    <string name="settings_menu_screen_saver_on">Stay Awake</string>
+    <string name="settings_menu_screen_saver_off">Enable Screen Saver</string>
+
+    <!-- button labels -->
+    <string name="start">START</string>
+    <string name="stop">STOP</string>
+    <string name="split">SPLIT</string>
+    <string name="clear">CLEAR</string>
+
 </resources>

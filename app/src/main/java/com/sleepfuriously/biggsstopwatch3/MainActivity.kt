@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -231,11 +232,11 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                 }) {
                     val startStopButtonTxt =
                         when (mainViewModel.stopwatchState) {
-                            START_STATE -> BUTTON_START_TEXT
-                            RUNNING_STATE -> BUTTON_STOP_TEXT
-                            STOPPED_STATE -> BUTTON_START_TEXT
-                            SPLIT_RUNNING_STATE -> BUTTON_STOP_TEXT
-                            SPLIT_STOPPED_STATE -> BUTTON_START_TEXT
+                            START_STATE -> stringResource(id = R.string.start)
+                            RUNNING_STATE -> stringResource(id = R.string.stop)
+                            STOPPED_STATE -> stringResource(id = R.string.start)
+                            SPLIT_RUNNING_STATE ->  stringResource(id = R.string.stop)
+                            SPLIT_STOPPED_STATE -> stringResource(id = R.string.start)
                             else -> "error"
                         }
                     Text(startStopButtonTxt)
@@ -259,10 +260,10 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                     val splitClearButtonTxt =
                         when (mainViewModel.stopwatchState) {
                             START_STATE -> ""
-                            RUNNING_STATE -> BUTTON_SPLIT_TEXT
-                            STOPPED_STATE -> BUTTON_CLEAR_TEXT
-                            SPLIT_RUNNING_STATE -> BUTTON_SPLIT_TEXT
-                            SPLIT_STOPPED_STATE -> BUTTON_CLEAR_TEXT
+                            RUNNING_STATE -> stringResource(id = R.string.split)
+                            STOPPED_STATE -> stringResource(id = R.string.clear)
+                            SPLIT_RUNNING_STATE -> stringResource(id = R.string.split)
+                            SPLIT_STOPPED_STATE -> stringResource(id = R.string.clear)
                             else -> "error"
                         }
                     Text(splitClearButtonTxt)
@@ -429,9 +430,9 @@ fun MyDropdownMenu(modifier: Modifier) {
                 text = {
                     Text(
                         if (mainViewModel.clickOn)
-                            "Sound Enabled"
+                            stringResource(id = R.string.settings_menu_sound_on)
                         else
-                            "Sound Disabled"
+                            stringResource(id = R.string.settings_menu_sound_on)
                     )
                 },
                 onClick = {
@@ -448,9 +449,9 @@ fun MyDropdownMenu(modifier: Modifier) {
                 text = {
                     Text(
                         if (mainViewModel.stayOn)
-                            "screen saver Disabled"
+                            stringResource(id = R.string.settings_menu_screen_saver_on)
                         else
-                            "screen saver Enabled"
+                            stringResource(id = R.string.settings_menu_screen_saver_off)
                     )
                 },
                 onClick = {
@@ -467,9 +468,9 @@ fun MyDropdownMenu(modifier: Modifier) {
                 text = {
                     Text(
                         if (mainViewModel.vibrateOn)
-                            "vibrate Enabled"
+                            stringResource(id = R.string.settings_menu_vibrate_on)
                         else
-                            "vibrate Disabled"
+                    stringResource(id = R.string.settings_menu_vibrate_off)
                     )
                 },
                 onClick = {
@@ -491,11 +492,5 @@ fun MyDropdownMenu(modifier: Modifier) {
 //-------------------------
 
 private const val TAG = "MainActivity"
-
-private const val BUTTON_START_TEXT = "START"
-private const val BUTTON_STOP_TEXT = "STOP"
-
-private const val BUTTON_SPLIT_TEXT = "SPLIT"
-private const val BUTTON_CLEAR_TEXT = "CLEAR"
 
 private const val CLICK_SOUND_ID = 1
