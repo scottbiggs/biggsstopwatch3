@@ -1,15 +1,16 @@
 package com.sleepfuriously.biggsstopwatch3
 
+import android.app.Application
+import android.content.Context
 import android.os.CountDownTimer
 import android.os.SystemClock
 import android.util.Log
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 
 
 /**
@@ -19,7 +20,7 @@ import androidx.lifecycle.ViewModel
  * that respects life cycles).  The LiveData lives within the
  * ViewModel class.
  */
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     //-------------------------
     //  vars
@@ -55,7 +56,6 @@ class MainViewModel : ViewModel() {
      * is pressed.
      */
     private var elapsedTime by mutableLongStateOf(0L)
-        private set
 
     /**
      * The time the split button was pushed.
@@ -116,6 +116,17 @@ class MainViewModel : ViewModel() {
     //-------------------------
     //  functions
     //-------------------------
+
+    init {
+        // load the values from shared prefs
+        val prefs = getApplication<Application>().getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
+        clickOn = prefs.getBoolean(SOUND_ON_PREF, true)
+        stayOn = prefs.getBoolean(DISABLE_SCREENSAVE_PREF, false)
+        vibrateOn = prefs.getBoolean(VIBRATE_ON_PREF, true)
+
+        Log.d(TAG, "init() -> clickOn = $clickOn, stayOn = $stayOn, vibrateOn = $vibrateOn")
+    }
+
 
     /**
      * Here is the table for state changes:
@@ -241,14 +252,14 @@ class MainViewModel : ViewModel() {
             }
 
             else -> {
-                Log.e(TAG, "Unknown state of ${stopwatchState} in nextState()!")
+                Log.e(TAG, "Unknown state of $stopwatchState in nextState()!")
                 stopwatchState = ERROR_STATE
                 timer.cancel()
             }
         }
 
         Log.d(TAG, "nextState() moved from ${STATE_NAMES[prevState]} to ${STATE_NAMES[stopwatchState]}")
-        Log.d(TAG, "   start time = ${stopwatchStart}, elapsed time = ${elapsedTime}, split time = ${stopwatchSplit}")
+        Log.d(TAG, "   start time = ${stopwatchStart}, elapsed time = ${elapsedTime}, split time = $stopwatchSplit")
         return stopwatchState
     }
 
@@ -257,14 +268,44 @@ class MainViewModel : ViewModel() {
      */
     fun toggleSound() {
         clickOn = !clickOn
+        save()
     }
 
     fun toggleStayOn() {
         stayOn = !stayOn
+        save()
     }
 
     fun toggleVibrateOn() {
         vibrateOn = !vibrateOn
+        save()
+    }
+
+
+    /**
+     * Saves the current state to SharedPrefs.  It's probably a good idea
+     * to call this any time the properties change (just in case the app
+     * is killed).
+     *
+     * NOTE:  The save is asynchronous, so it shouldn't cause any performance
+     * problems.
+     *
+     * side effects
+     *      clickOn         will be written to pref file
+     *      vibrateOn       "                          "
+     *      stayOn          "                          "
+     */
+    private fun save() {
+        val prefs = getApplication<Application>().getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
+
+        with (prefs.edit()) {
+            putBoolean(SOUND_ON_PREF, clickOn)
+            putBoolean(VIBRATE_ON_PREF, vibrateOn)
+            putBoolean(DISABLE_SCREENSAVE_PREF, stayOn)
+            apply()
+        }
+
+        Log.d(TAG, "save() -> clickOn = $clickOn, stayOn = $stayOn, vibrateOn = $vibrateOn")
     }
 
 //-------------------------
@@ -272,6 +313,7 @@ class MainViewModel : ViewModel() {
 //-------------------------
 
     companion object {
+        private const val TAG = "MainViewModel"
 
         /**
          * button ids.  this class will refer to the buttons throught
@@ -290,17 +332,24 @@ class MainViewModel : ViewModel() {
         const val SPLIT_STOPPED_STATE = 4   // display shows split time, but counter is stopped at another time
         const val ERROR_STATE = -1          // an error occurred
 
-        val STATE_NAMES = arrayOf(
+        private val STATE_NAMES = arrayOf(
             "START",
             "RUNNING",
             "STOPPED",
             "SPLIT_RUNNING",
             "SPLIT_STOPPED"
             )
+
+        /** name of the shared preferences file */
+        private const val PREF_FILE = "biggs.stopwatch_prefs"
+
+        // keys for the prefs
+        private const val SOUND_ON_PREF = "sound_on"
+        private const val DISABLE_SCREENSAVE_PREF = "disable_screen_saver"
+        private const val VIBRATE_ON_PREF = "vibrate_on_pref"
     }
 
 }
 
 
-private const val TAG = "MainViewModel"
 

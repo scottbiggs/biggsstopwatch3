@@ -114,8 +114,13 @@ class MainActivity : ComponentActivity() {
             .build()
         soundPool!!.load(baseContext, R.raw.button_click, 1)
     }
+
+
 }
 
+//-------------------
+//  free functions
+//-------------------
 
 /**
  * Plays a click (assuming that the preferences allow it)
@@ -429,10 +434,12 @@ fun MyDropdownMenu(modifier: Modifier) {
             DropdownMenuItem(
                 text = {
                     Text(
-                        if (mainViewModel.clickOn)
+                        if (mainViewModel.clickOn) {
                             stringResource(id = R.string.settings_menu_sound_on)
-                        else
-                            stringResource(id = R.string.settings_menu_sound_on)
+                        }
+                        else {
+                            stringResource(id = R.string.settings_menu_sound_off)
+                        }
                     )
                 },
                 onClick = {
