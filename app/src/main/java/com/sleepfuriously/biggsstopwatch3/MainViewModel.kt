@@ -76,7 +76,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * When TRUE, this app will keep the screen from turning off.
      * Default is FALSE.
      */
-    var stayOn by mutableStateOf(false)
+    var stayAwake by mutableStateOf(false)
         private set
 
     /**
@@ -121,10 +121,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         // load the values from shared prefs
         val prefs = getApplication<Application>().getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
         clickOn = prefs.getBoolean(SOUND_ON_PREF, true)
-        stayOn = prefs.getBoolean(DISABLE_SCREENSAVE_PREF, false)
+        stayAwake = prefs.getBoolean(DISABLE_SCREENSAVE_PREF, false)
         vibrateOn = prefs.getBoolean(VIBRATE_ON_PREF, true)
 
-        Log.d(TAG, "init() -> clickOn = $clickOn, stayOn = $stayOn, vibrateOn = $vibrateOn")
+        Log.d(TAG, "init() -> clickOn = $clickOn, stayOn = $stayAwake, vibrateOn = $vibrateOn")
     }
 
 
@@ -272,7 +272,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleStayOn() {
-        stayOn = !stayOn
+        stayAwake = !stayAwake
         save()
     }
 
@@ -301,11 +301,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         with (prefs.edit()) {
             putBoolean(SOUND_ON_PREF, clickOn)
             putBoolean(VIBRATE_ON_PREF, vibrateOn)
-            putBoolean(DISABLE_SCREENSAVE_PREF, stayOn)
+            putBoolean(DISABLE_SCREENSAVE_PREF, stayAwake)
             apply()
         }
 
-        Log.d(TAG, "save() -> clickOn = $clickOn, stayOn = $stayOn, vibrateOn = $vibrateOn")
+        Log.d(TAG, "save() -> clickOn = $clickOn, stayOn = $stayAwake, vibrateOn = $vibrateOn")
     }
 
 //-------------------------

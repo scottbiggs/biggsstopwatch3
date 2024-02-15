@@ -14,13 +14,23 @@
     <string name="settings_menu_vibrate_on">Turn Vibrate OFF</string>
     <string name="settings_menu_vibrate_off">Turn Vibrate ON</string>
 
-    <string name="settings_menu_screen_saver_on">Stay Awake</string>
-    <string name="settings_menu_screen_saver_off">Enable Screen Saver</string>
+    <string name="settings_menu_disable_screen_saver">Disable Screen Saver</string>
+    <string name="settings_menu_enable_screen_saver">Enable Screen Saver</string>
 
     <!-- button labels -->
     <string name="start">START</string>
     <string name="stop">STOP</string>
     <string name="split">SPLIT</string>
     <string name="clear">CLEAR</string>
+
+    <!-- toast msgs -->
+    <string name="sound_on_toast_msg">Sound is now playing</string>
+    <string name="sound_off_toast_msg">Sound is turned off</string>
+
+    <string name="screen_saver_disabled_toast_msg">Screen saver will not engage while running Stopwatch</string>
+    <string name="screen_saver_enabled_toast_msg">Screen saver will work normally</string>
+
+    <string name="vibration_on_toast_msg">Vibration is turned on</string>
+    <string name="vibration_off_toast_msg">Vibration is turned off</string>
 
 </resources>

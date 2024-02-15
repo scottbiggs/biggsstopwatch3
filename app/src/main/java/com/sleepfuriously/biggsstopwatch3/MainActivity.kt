@@ -1,5 +1,6 @@
 package com.sleepfuriously.biggsstopwatch3
 
+import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
 import android.media.SoundPool
@@ -8,6 +9,7 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -53,6 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.content.ContextCompat.getString
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
@@ -129,6 +132,16 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    override fun onResume() {
+        super.onResume()
+        if (mainViewModel.stayAwake) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+
+    }
 }
 
 //-------------------
@@ -495,8 +508,11 @@ fun MyDropdownMenu(modifier: Modifier) {
                 },
                 onClick = {
                     mainViewModel.toggleSound()
-                    val str = if (mainViewModel.clickOn) "now playing" else "turned off"
-                    Toast.makeText(ctx, "Sound is $str", Toast.LENGTH_LONG).show()
+                    val str = if (mainViewModel.clickOn)
+                                getString(ctx, R.string.sound_on_toast_msg)
+                              else
+                                getString(ctx, R.string.sound_off_toast_msg)
+                    Toast.makeText(ctx, str, Toast.LENGTH_LONG).show()
                     expanded = false        // closes the menu
                 }
             )
@@ -506,17 +522,32 @@ fun MyDropdownMenu(modifier: Modifier) {
             DropdownMenuItem(
                 text = {
                     Text(
-                        if (mainViewModel.stayOn)
-                            stringResource(id = R.string.settings_menu_screen_saver_on)
+                        // if we are currently disabling the screen saver, have the menu
+                        // suggest the opposite
+                        if (mainViewModel.stayAwake)
+                            stringResource(id = R.string.settings_menu_enable_screen_saver)
                         else
-                            stringResource(id = R.string.settings_menu_screen_saver_off)
+                            stringResource(id = R.string.settings_menu_disable_screen_saver)
                     )
                 },
                 onClick = {
                     mainViewModel.toggleStayOn()
-                    val str = if (mainViewModel.stayOn) "never engage" else "work normally"
-                    Toast.makeText(ctx, "Screen saver will $str", Toast.LENGTH_SHORT).show()
+                    val str =
+                        if (mainViewModel.stayAwake)
+                            getString(ctx, R.string.screen_saver_disabled_toast_msg)
+                        else
+                            getString(ctx, R.string.screen_saver_enabled_toast_msg)
+                    Toast.makeText(ctx, str, Toast.LENGTH_SHORT).show()
                     expanded = false
+
+                    // enable/disable screen saver
+                    val activity = ctx as Activity
+                    if (mainViewModel.stayAwake) {
+                        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                    else {
+                        activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
                 }
             )
 
@@ -534,8 +565,12 @@ fun MyDropdownMenu(modifier: Modifier) {
                 },
                 onClick = {
                     mainViewModel.toggleVibrateOn()
-                    val str = if (mainViewModel.vibrateOn) "on" else "off"
-                    Toast.makeText(ctx, "Vibration is turned $str", Toast.LENGTH_LONG).show()
+                    val str =
+                        if (mainViewModel.vibrateOn)
+                            getString(ctx, R.string.vibration_on_toast_msg)
+                        else
+                            getString(ctx, R.string.vibration_off_toast_msg)
+                    Toast.makeText(ctx, str, Toast.LENGTH_LONG).show()
                     expanded = false
                     vibrate(BUTTON_VIBRATION_DURATION, ctx)
                 }
