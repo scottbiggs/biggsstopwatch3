@@ -1,8 +1,12 @@
 package com.sleepfuriously.biggsstopwatch3
 
+import android.content.Context
 import android.content.res.Configuration
 import android.media.SoundPool
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -49,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.BUTTON_SPLIT_CLEAR
@@ -80,6 +85,9 @@ private lateinit var mainViewModel: MainViewModel
 
 /** another way of playing sounds */
 private var soundPool : SoundPool? = null
+
+/** when TRUE, this device is able to vibrate */
+private var hasVibe = true
 
 
 //-------------------------
@@ -113,6 +121,11 @@ class MainActivity : ComponentActivity() {
             .setMaxStreams(5)
             .build()
         soundPool!!.load(baseContext, R.raw.button_click, 1)
+
+        // does this device have a vibrator?
+        val vibrator = getSystemService(this, Vibrator::class.java)
+        hasVibe = vibrator?.hasVibrator() ?: false
+
     }
 
 
@@ -181,6 +194,39 @@ fun getDisplayTime(millis : Long) : String {
     }
 }
 
+/**
+ * Guess what this does?  And can you guess what happens if vibration is
+ * turned off?  Yep, I thought you could!
+ *
+ * preconditions
+ *      mainViewModel.vibrateOn     Only vibrates if this value is true.
+ *
+ * @param   millis      Number of milliseconds to vibrate
+ *
+ * @param   ctx         Context for playing this sound
+ *
+ */
+fun vibrate(millis: Long, ctx: Context) {
+
+    // don't bother if vibration is turned off
+    if (!mainViewModel.vibrateOn)
+        return
+
+    val vibrator = getSystemService(ctx, Vibrator::class.java)
+
+    // The ?.let allows us to continue only if vibrator is not null.
+    // It can be null on devices that don't vibrate.
+    vibrator?.let {
+        if (Build.VERSION.SDK_INT >= 26) {
+            it.vibrate(VibrationEffect.createOneShot(millis, VibrationEffect.DEFAULT_AMPLITUDE))
+        }
+        else {
+            @Suppress("DEPRECATION")
+            it.vibrate(millis)
+        }
+
+    }
+}
 
 //-------------------
 //  composables
@@ -231,8 +277,9 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                         containerColor = MaterialTheme.colorScheme.onSecondaryContainer
                     ),
                     onClick = {
-                        click()
                         mainViewModel.nextState(BUTTON_START_STOP)
+                        click()
+                        vibrate(BUTTON_VIBRATION_DURATION, ctx)
                         Log.d(TAG, "start button click")
                 }) {
                     val startStopButtonTxt =
@@ -260,6 +307,7 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                     onClick = {
                         click()
                         mainViewModel.nextState(BUTTON_SPLIT_CLEAR)
+                        vibrate(BUTTON_VIBRATION_DURATION, ctx)
                         Log.d(TAG, "split button click")
                 }) {
                     val splitClearButtonTxt =
@@ -414,12 +462,15 @@ fun AutoSizeText(
  */
 @Composable
 fun MyDropdownMenu(modifier: Modifier) {
-    val context = LocalContext.current
+    val ctx = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = modifier)
     {
-        IconButton(onClick = { expanded = !expanded }) {
+        IconButton(onClick = {
+            expanded = !expanded
+            vibrate(BUTTON_VIBRATION_DURATION, ctx)
+        }) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
                 tint = if (isSystemInDarkTheme()) Color.White else Color.Black,
@@ -445,7 +496,7 @@ fun MyDropdownMenu(modifier: Modifier) {
                 onClick = {
                     mainViewModel.toggleSound()
                     val str = if (mainViewModel.clickOn) "now playing" else "turned off"
-                    Toast.makeText(context, "Sound is $str", Toast.LENGTH_LONG).show()
+                    Toast.makeText(ctx, "Sound is $str", Toast.LENGTH_LONG).show()
                     expanded = false        // closes the menu
                 }
             )
@@ -464,7 +515,7 @@ fun MyDropdownMenu(modifier: Modifier) {
                 onClick = {
                     mainViewModel.toggleStayOn()
                     val str = if (mainViewModel.stayOn) "never engage" else "work normally"
-                    Toast.makeText(context, "Screen saver will $str", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(ctx, "Screen saver will $str", Toast.LENGTH_SHORT).show()
                     expanded = false
                 }
             )
@@ -472,6 +523,7 @@ fun MyDropdownMenu(modifier: Modifier) {
             Divider()
 
             DropdownMenuItem(
+                enabled = hasVibe,
                 text = {
                     Text(
                         if (mainViewModel.vibrateOn)
@@ -483,8 +535,9 @@ fun MyDropdownMenu(modifier: Modifier) {
                 onClick = {
                     mainViewModel.toggleVibrateOn()
                     val str = if (mainViewModel.vibrateOn) "on" else "off"
-                    Toast.makeText(context, "Vibration is turned $str", Toast.LENGTH_LONG).show()
+                    Toast.makeText(ctx, "Vibration is turned $str", Toast.LENGTH_LONG).show()
                     expanded = false
+                    vibrate(BUTTON_VIBRATION_DURATION, ctx)
                 }
             )
 
@@ -501,3 +554,6 @@ fun MyDropdownMenu(modifier: Modifier) {
 private const val TAG = "MainActivity"
 
 private const val CLICK_SOUND_ID = 1
+
+/** time in milliseconds the phone should vibrate when a button is pressed */
+private const val BUTTON_VIBRATION_DURATION = 15L
