@@ -75,6 +75,7 @@ import com.sleepfuriously.biggsstopwatch3.ui.theme.BiggsStopwatch3Theme
  * to use.  Sigh.
  */
 
+// todo:  make the timer buttons work on the DOWN push, not the release!
 
 //-------------------------
 //  globals
