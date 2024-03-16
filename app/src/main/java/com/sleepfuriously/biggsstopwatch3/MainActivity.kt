@@ -295,8 +295,8 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                         .weight(1f),
                     backgroundColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     textColor = MaterialTheme.colorScheme.onPrimary,
-                    touchedBackgroundColor = MaterialTheme.colorScheme.tertiary,
-                    touchedTextColor = MaterialTheme.colorScheme.onTertiary,
+                    touchedBackgroundColor = MaterialTheme.colorScheme.secondary,
+                    touchedTextColor = MaterialTheme.colorScheme.onSecondary,
                     downTouchFun = {
                         mainViewModel.nextState(BUTTON_START_STOP)
                         playClick()
@@ -323,8 +323,8 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                         .weight(1f),
                     backgroundColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     textColor = MaterialTheme.colorScheme.onPrimary,
-                    touchedBackgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                    touchedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    touchedBackgroundColor = MaterialTheme.colorScheme.tertiary,
+                    touchedTextColor = MaterialTheme.colorScheme.onTertiary,
                     enabled = mainViewModel.stopwatchState != START_STATE,
                     downTouchFun = {
                         playClick()
