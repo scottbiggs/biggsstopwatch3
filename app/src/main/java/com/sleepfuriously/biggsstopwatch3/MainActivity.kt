@@ -14,23 +14,24 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +48,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -67,6 +70,7 @@ import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.SPLIT_STOPPED_
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.START_STATE
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.STOPPED_STATE
 import com.sleepfuriously.biggsstopwatch3.ui.theme.BiggsStopwatch3Theme
+import java.util.concurrent.CancellationException
 
 
 /**
@@ -74,8 +78,6 @@ import com.sleepfuriously.biggsstopwatch3.ui.theme.BiggsStopwatch3Theme
  * a viewmodel, and stateflow, three things that I am reluctantly learning
  * to use.  Sigh.
  */
-
-// todo:  make the timer buttons work on the DOWN push, not the release!
 
 //-------------------------
 //  globals
@@ -152,7 +154,7 @@ class MainActivity : ComponentActivity() {
 /**
  * Plays a click (assuming that the preferences allow it)
  */
-fun click() {
+fun playClick() {
     if (mainViewModel.clickOn) {
         soundPool?.play(CLICK_SOUND_ID, 1f, 1f, 0, 0, 1f)
     }
@@ -262,8 +264,7 @@ fun MainDisplay(mainViewModel : MainViewModel) {
         )
     }
 
-        BiggsStopwatch3Theme {
-
+    BiggsStopwatch3Theme {
         // box background for entire drawing.  Also the buttons will be at the
         // bottom of this box.
         Box(
@@ -278,63 +279,61 @@ fun MainDisplay(mainViewModel : MainViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                // Start Button
-                Column {
-
-                }
-
                 // START / STOP
-                ElevatedButton(
+                val startStopButtonTxt =
+                    when (mainViewModel.stopwatchState) {
+                        START_STATE -> stringResource(id = R.string.start)
+                        RUNNING_STATE -> stringResource(id = R.string.stop)
+                        STOPPED_STATE -> stringResource(id = R.string.start)
+                        SPLIT_RUNNING_STATE ->  stringResource(id = R.string.stop)
+                        SPLIT_STOPPED_STATE -> stringResource(id = R.string.start)
+                        else -> "error"
+                    }
+                DownUpButton(
+                    title = startStopButtonTxt,
                     modifier = Modifier
                         .weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onSecondaryContainer
-                    ),
-                    onClick = {
+                    backgroundColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    textColor = MaterialTheme.colorScheme.onPrimary,
+                    touchedBackgroundColor = MaterialTheme.colorScheme.tertiary,
+                    touchedTextColor = MaterialTheme.colorScheme.onTertiary,
+                    downTouchFun = {
                         mainViewModel.nextState(BUTTON_START_STOP)
-                        click()
+                        playClick()
                         vibrate(BUTTON_VIBRATION_DURATION, ctx)
                         Log.d(TAG, "start button click")
-                }) {
-                    val startStopButtonTxt =
-                        when (mainViewModel.stopwatchState) {
-                            START_STATE -> stringResource(id = R.string.start)
-                            RUNNING_STATE -> stringResource(id = R.string.stop)
-                            STOPPED_STATE -> stringResource(id = R.string.start)
-                            SPLIT_RUNNING_STATE ->  stringResource(id = R.string.stop)
-                            SPLIT_STOPPED_STATE -> stringResource(id = R.string.start)
-                            else -> "error"
-                        }
-                    Text(startStopButtonTxt)
-                }
+                    }
+                )
 
                 Spacer(Modifier.width(16.dp))
 
                 // SPLIT / CLEAR
-                ElevatedButton(
+                val splitClearButtonTxt =
+                    when (mainViewModel.stopwatchState) {
+                        START_STATE -> ""
+                        RUNNING_STATE -> stringResource(id = R.string.split)
+                        STOPPED_STATE -> stringResource(id = R.string.clear)
+                        SPLIT_RUNNING_STATE -> stringResource(id = R.string.split)
+                        SPLIT_STOPPED_STATE -> stringResource(id = R.string.clear)
+                        else -> "error"
+                    }
+                DownUpButton(
+                    title = splitClearButtonTxt,
                     modifier = Modifier
                         .weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    ),
+                    backgroundColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    textColor = MaterialTheme.colorScheme.onPrimary,
+                    touchedBackgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                    touchedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     enabled = mainViewModel.stopwatchState != START_STATE,
-                    onClick = {
-                        click()
+                    downTouchFun = {
+                        playClick()
                         mainViewModel.nextState(BUTTON_SPLIT_CLEAR)
                         vibrate(BUTTON_VIBRATION_DURATION, ctx)
                         Log.d(TAG, "split button click")
-                }) {
-                    val splitClearButtonTxt =
-                        when (mainViewModel.stopwatchState) {
-                            START_STATE -> ""
-                            RUNNING_STATE -> stringResource(id = R.string.split)
-                            STOPPED_STATE -> stringResource(id = R.string.clear)
-                            SPLIT_RUNNING_STATE -> stringResource(id = R.string.split)
-                            SPLIT_STOPPED_STATE -> stringResource(id = R.string.clear)
-                            else -> "error"
-                        }
-                    Text(splitClearButtonTxt)
-                }
+                    }
+                )
+
             }
         }
 
@@ -579,6 +578,128 @@ fun MyDropdownMenu(modifier: Modifier) {
 
         }
 
+    }
+}
+
+
+/**
+ * This is a button that activates specifically on the DOWN touch of the button
+ * and/or the button release.
+ *
+ * Note that this does NOT have a ripple effect.  It changes color on touch,
+ * which is handled by this function.
+ *
+ * @param   title           Title for the button
+ *
+ * @param   modifier        You've seen this before!
+ *
+ * @param   backgroundColor Color for the background of the button.  Defaults to
+ *                          the primary color.
+ *
+ * @param   textColor       Color for the text of the button.  Defaults on onPrimary.
+ *
+ * @param   touchedBackgroundColor      The color for the background while this button
+ *                                      is being touched.  Defaults to tertiary.
+ *
+ * @param   touchedTextColor            Color of the text when the button is touched.
+ *                                      Defaults to onTertiary.
+ *
+ * @param   enabled         Set this to false to disable this button. Default = true.
+ *
+ * @param   downTouchFun    Run this function when the button goes down
+ *
+ * @param   upTouchFun      Function to run when the button has an UP action.
+ *                          Note that if the user slides his finger away from
+ *                          the button before lifting, then this will not trigger.
+ */
+@Composable
+fun DownUpButton(
+    title: String,
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colorScheme.primary,
+    textColor: Color = MaterialTheme.colorScheme.onPrimary,
+    touchedBackgroundColor: Color = MaterialTheme.colorScheme.tertiary,
+    touchedTextColor: Color = MaterialTheme.colorScheme.onTertiary,
+    enabled: Boolean = true,
+    downTouchFun: () -> Unit = {},
+    upTouchFun: () -> Unit = {}
+) {
+    var touchedDown : Boolean by rememberSaveable{ mutableStateOf(false) }
+
+    var currentBackgroundColor = backgroundColor
+    var currentTextColor = textColor
+
+    // necessary for the colors to work correctly.
+    if (touchedDown) {
+        Log.d(TAG, "SampleButton2() if touchedDown...")
+//        currentBackgroundColor = MaterialTheme.colorScheme.tertiary
+//        currentTextColor = MaterialTheme.colorScheme.onTertiary
+        currentBackgroundColor = touchedBackgroundColor
+        currentTextColor = touchedTextColor
+    }
+
+    if (!enabled) {
+        // disabled -- draw a fake button
+        Card(
+            modifier = modifier,
+            shape = RoundedCornerShape(40f),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            )
+        ) {
+            Text(
+                text = title,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier
+                    .padding(12.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+        }
+    }
+    else {
+        // draw the "real" button
+        Card(
+            modifier = modifier
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = {
+                            Log.i(TAG, "On Touch Down.")
+                            downTouchFun.invoke()
+                            touchedDown = true
+                            //start
+                            val released = try {
+                                tryAwaitRelease()
+                            } catch (c: CancellationException) {
+                                // this happens if the touch drags
+                                false
+                            }
+                            if (released) {
+                                //ACTION_UP
+                                Log.i(TAG, "On Touch Release.")
+                                touchedDown = false
+                                Log.d(TAG, "button released. Running upTouchFun.invoke()")
+                                upTouchFun.invoke()
+                            } else {
+                                //CANCELED
+                                Log.i(TAG, "On Touch Cancelled.")
+                                touchedDown = false
+                            }
+                        },
+                    )
+                },
+            shape = RoundedCornerShape(40f),
+            colors = CardDefaults.cardColors(
+                containerColor = currentBackgroundColor,
+            ),
+        ) {
+            Text(
+                text = title,
+                color = currentTextColor,
+                modifier = Modifier
+                    .padding(12.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+        }
     }
 }
 
