@@ -584,9 +584,10 @@ fun MyDropdownMenu(modifier: Modifier) {
             var aboutClicked by remember { mutableStateOf(false) }
             if (aboutClicked) {
                 MyDialog(
-                    title = stringResource(id = R.string.about_title),
-                    msg = stringResource(id = R.string.about_msg)
+                    titleStr = stringResource(id = R.string.about_title),
+                    msgStr = stringResource(id = R.string.about_msg)
                 ) {
+                    Log.d(TAG, "ok clicked")
                     // this is the lambda that's called when the OK is clicked
                     aboutClicked = false
                     expanded = false

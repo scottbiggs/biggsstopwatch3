@@ -1,8 +1,10 @@
 package com.sleepfuriously.biggsstopwatch3.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -20,7 +22,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.sleepfuriously.biggsstopwatch3.R
+
+
+const val TAG = "MyDialog"
 
 
 /**
@@ -30,9 +36,9 @@ import com.sleepfuriously.biggsstopwatch3.R
  */
 @Composable
 fun MyDialog(
-    title : String,
-    msg: String,
-    onDismiss: () -> Unit = {}
+    titleStr : String,
+    msgStr: String,
+    onDismiss: () -> Unit = { Log.d(TAG, "MyDialog OK") }
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -40,17 +46,64 @@ fun MyDialog(
                 .fillMaxWidth()
                 .padding(20.dp)
         ) {
+            ConstraintLayout(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .fillMaxWidth()
+            ) {
+                // names for the constrained widgets
+                val (
+                    title, msg, ok
+                ) = createRefs()
+
+                // title at the top
+                Text(
+                    titleStr,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .constrainAs(title) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
+                        }
+                )
+
+                // ok button at bottom right
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .constrainAs(ok) {
+                            bottom.linkTo(parent.bottom)
+                            end.linkTo(parent.end)
+                        }
+                ) {
+                    Text(stringResource(id = R.string.ok))
+                }
+
+                // text in the middle
+                MyScrollText(
+                    msgStr,
+                    Modifier
+                        .constrainAs(msg) {
+                            top.linkTo(title.bottom)
+                            bottom.linkTo(ok.top)
+                            centerHorizontallyTo(parent)
+                        }
+                )
+            } // constraint layout
+
+/*
             Column(
                 modifier = Modifier
                     .padding(24.dp)
             ) {
                 Text(
-                    title,
+                    titleStr,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
 
-                MyScrollText(msg)
+                MyScrollText(msgStr)
 
                 TextButton(
                     onClick = onDismiss,
@@ -63,6 +116,7 @@ fun MyDialog(
                     )
                 }
             }
+*/
         }
     }
 }
@@ -73,7 +127,10 @@ fun MyDialog(
  * implements scrollable Text functions, this'll have to do.  Sigh.
  */
 @Composable
-fun MyScrollText(str: String) {
+fun MyScrollText(
+    str: String,
+    modifier: Modifier
+) {
     val scroll = rememberScrollState(0)
 
     LazyColumn {
@@ -81,9 +138,9 @@ fun MyScrollText(str: String) {
             Text(
                 text = str,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .heightIn(0.dp, 300.dp)
+                modifier = modifier
+                    .padding(8.dp, 40.dp)
+                    .height(250.dp)
                     .verticalScroll(scroll)
             )
         }
@@ -94,5 +151,5 @@ fun MyScrollText(str: String) {
 @Preview
 @Composable
 private fun Preview() {
-    MyDialog(title = "Test", msg = "This is a test")
+    MyDialog(titleStr = "Test", msgStr = "This is a test")
 }
