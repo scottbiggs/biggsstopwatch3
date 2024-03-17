@@ -3,7 +3,7 @@
     <string name="test_string">88:88:88.88</string>
 
     <!--
-        settings menu
+        menu
         The name of the settings corresponds to the current state,
         that is: the state that currently exists.  So if sound is
         currently playing, then the correct menu item is "turn sound off."
@@ -16,6 +16,37 @@
 
     <string name="settings_menu_disable_screen_saver">Disable Screen Saver</string>
     <string name="settings_menu_enable_screen_saver">Enable Screen Saver</string>
+
+    <string name="about">About</string>
+
+    <string name="about_title">Notes</string>
+    <string name="about_msg">
+        This is yet another app made by Biggs—version 3 of my famous
+        stopwatch app.  It uses all the latest programming bells, whistles, and other crap that is required of
+        current Android apps, but you the user don\'t need to know about.  All these latest \"improvements\"
+        have forced this app to grow from a sweet little 16 kilobytes (version 1 in 2012) to its current waste of space: 37 megabytes.
+        Apologies for the hugeness of this app, but Google no longer approves of lean clean simple programming.
+        And that\'s the truth, thbtbtbtt!\n
+        \n
+        My philosophy is that apps should do one thing and do it well.  If I can\'t find something
+        that fits this philosophy, then I make an app that does the trick.  This is a stopwatch.  It
+        is not a timer, it is not a clock, and it definitely is not social media.  It accurately
+        tells you how much time has elapsed.  To do this it needs no permissions whatsoever!
+        Thank you, thank you.  You have finally found an app that records no data, asks no questions,
+        and really doesn\'t give a crap who you are and what you do.\n
+        \n
+        Which leads me to privacy.  This is your phone.  Everything you do with it is completely
+        your business.  Not only does this app not collect any data, I don\'t WANT to collect
+        data (that would require servers, maintanance, etc. etc. and well frankly, I have a
+        life—and I\'m way too lazy to be bothered with such boring stuff).\n
+        \n
+        So go ahead and use this (not so) little stopwatch app if you like. If you don\'t like
+        it, remove the damn thing! Life is too short to worry about the small stuff.\n
+        \n
+        Feb. 2024
+    </string>
+    <string name="ok">OK</string>
+
 
     <!-- button labels -->
     <string name="start">START</string>

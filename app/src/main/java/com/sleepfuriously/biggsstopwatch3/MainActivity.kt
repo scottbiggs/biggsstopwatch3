@@ -69,6 +69,7 @@ import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.SPLIT_RUNNING_
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.SPLIT_STOPPED_STATE
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.START_STATE
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.STOPPED_STATE
+import com.sleepfuriously.biggsstopwatch3.ui.MyDialog
 import com.sleepfuriously.biggsstopwatch3.ui.theme.BiggsStopwatch3Theme
 import java.util.concurrent.CancellationException
 
@@ -573,6 +574,31 @@ fun MyDropdownMenu(modifier: Modifier) {
                     Toast.makeText(ctx, str, Toast.LENGTH_LONG).show()
                     expanded = false
                     vibrate(BUTTON_VIBRATION_DURATION, ctx)
+                }
+            )
+
+            Divider()
+
+            // Can't do this code in the onClick lambda.  It needs to recompose
+            // to actually work.
+            var aboutClicked by remember { mutableStateOf(false) }
+            if (aboutClicked) {
+                MyDialog(
+                    title = stringResource(id = R.string.about_title),
+                    msg = stringResource(id = R.string.about_msg)
+                ) {
+                    // this is the lambda that's called when the OK is clicked
+                    aboutClicked = false
+                    expanded = false
+                }
+            }
+
+            DropdownMenuItem(
+                text = {
+                    Text(stringResource(id = R.string.about))
+                },
+                onClick = {
+                    aboutClicked = true
                 }
             )
 
