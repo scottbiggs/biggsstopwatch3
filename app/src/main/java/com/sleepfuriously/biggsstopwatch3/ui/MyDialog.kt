@@ -1,8 +1,6 @@
 package com.sleepfuriously.biggsstopwatch3.ui
 
 import android.util.Log
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +35,7 @@ const val TAG = "MyDialog"
 fun MyDialog(
     titleStr : String,
     msgStr: String,
-    onDismiss: () -> Unit = { Log.d(TAG, "MyDialog OK") }
+    onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -70,7 +67,7 @@ fun MyDialog(
 
                 // ok button at bottom right
                 TextButton(
-                    onClick = onDismiss,
+                    onClick = { onDismiss.invoke() },
                     modifier = Modifier
                         .constrainAs(ok) {
                             bottom.linkTo(parent.bottom)
@@ -129,7 +126,7 @@ fun MyDialog(
 @Composable
 fun MyScrollText(
     str: String,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     val scroll = rememberScrollState(0)
 
@@ -139,8 +136,8 @@ fun MyScrollText(
                 text = str,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = modifier
-                    .padding(8.dp, 40.dp)
-                    .height(250.dp)
+                    .padding(8.dp, 22.dp)
+                    .height(400.dp)
                     .verticalScroll(scroll)
             )
         }
@@ -148,8 +145,10 @@ fun MyScrollText(
 }
 
 
+
 @Preview
 @Composable
 private fun Preview() {
-    MyDialog(titleStr = "Test", msgStr = "This is a test")
+    MyDialog(titleStr = "Test", msgStr = "This is a test") {
+    }
 }

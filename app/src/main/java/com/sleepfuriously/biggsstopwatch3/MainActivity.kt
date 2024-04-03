@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -36,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,7 +71,7 @@ import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.SPLIT_RUNNING_
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.SPLIT_STOPPED_STATE
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.START_STATE
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.STOPPED_STATE
-import com.sleepfuriously.biggsstopwatch3.ui.MyDialog
+import com.sleepfuriously.biggsstopwatch3.ui.MyScrollText
 import com.sleepfuriously.biggsstopwatch3.ui.theme.BiggsStopwatch3Theme
 import java.util.concurrent.CancellationException
 
@@ -436,6 +438,8 @@ fun AutoSizeText(
     textStyle: TextStyle,
     modifier: Modifier = Modifier
 ) {
+    // NOTE:  mutableStates cause recomposition whenever they change!
+    //  (but only the composables that read these values recompose)
     var scaledTextStyle by remember { mutableStateOf(textStyle) }
     var readyToDraw by remember { mutableStateOf(false) }
 
@@ -579,19 +583,52 @@ fun MyDropdownMenu(modifier: Modifier) {
 
             Divider()
 
-            // Can't do this code in the onClick lambda.  It needs to recompose
-            // to actually work.
-            var aboutClicked by remember { mutableStateOf(false) }
-            if (aboutClicked) {
-                MyDialog(
-                    titleStr = stringResource(id = R.string.about_title),
-                    msgStr = stringResource(id = R.string.about_msg)
-                ) {
-                    Log.d(TAG, "ok clicked")
-                    // this is the lambda that's called when the OK is clicked
-                    aboutClicked = false
-                    expanded = false
-                }
+            // only show the dialog if showDialog is true
+            var showDialog by remember { mutableStateOf(false) }
+            if (showDialog) {
+//                MyDialog(
+//                    titleStr = stringResource(id = R.string.about_title),
+//                    msgStr = stringResource(id = R.string.about_msg),
+//                    onDismiss = {
+//                        Log.d(TAG, "ok clicked")
+//                        showDialog = false
+//                        expanded = false
+//                    }
+//                )
+
+                AlertDialog(
+                    onDismissRequest = {
+                        Log.d(TAG, "dismiss request activated")
+                        showDialog = false
+                        expanded = false
+                    },
+                    title = {
+                        Text(
+                            stringResource(id = R.string.about_title),
+                            modifier = Modifier
+                                .padding(0.dp, 8.dp, 0.dp, 16.dp)
+                        )
+                    },
+                    text = {
+                        MyScrollText(str = stringResource(id = R.string.about_msg))
+                    },
+
+                    confirmButton = { },        // don't show anything -- not used
+
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                Log.d(TAG, "dismiss button hit")
+                                showDialog = false
+                                expanded = false
+                            }
+                        ) {
+                            Text(stringResource(id = R.string.ok))
+                        }
+                    }
+
+                )
+
             }
 
             DropdownMenuItem(
@@ -599,7 +636,7 @@ fun MyDropdownMenu(modifier: Modifier) {
                     Text(stringResource(id = R.string.about))
                 },
                 onClick = {
-                    aboutClicked = true
+                    showDialog = true
                 }
             )
 
