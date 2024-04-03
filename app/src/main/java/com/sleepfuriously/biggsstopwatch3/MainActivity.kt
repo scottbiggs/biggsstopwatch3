@@ -603,11 +603,7 @@ fun MyDropdownMenu(modifier: Modifier) {
                         expanded = false
                     },
                     title = {
-                        Text(
-                            stringResource(id = R.string.about_title),
-                            modifier = Modifier
-                                .padding(0.dp, 8.dp, 0.dp, 16.dp)
-                        )
+                        Text(stringResource(id = R.string.about_title))
                     },
                     text = {
                         MyScrollText(str = stringResource(id = R.string.about_msg))
