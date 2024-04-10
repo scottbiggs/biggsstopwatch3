@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -37,7 +36,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,7 +69,7 @@ import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.SPLIT_RUNNING_
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.SPLIT_STOPPED_STATE
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.START_STATE
 import com.sleepfuriously.biggsstopwatch3.MainViewModel.Companion.STOPPED_STATE
-import com.sleepfuriously.biggsstopwatch3.ui.MyScrollText
+import com.sleepfuriously.biggsstopwatch3.ui.MyDialog
 import com.sleepfuriously.biggsstopwatch3.ui.theme.BiggsStopwatch3Theme
 import java.util.concurrent.CancellationException
 
@@ -586,35 +584,20 @@ fun MyDropdownMenu(modifier: Modifier) {
             // only show the dialog if showDialog is true
             var showDialog by remember { mutableStateOf(false) }
             if (showDialog) {
-                AlertDialog(
-                    onDismissRequest = {
-                        Log.d(TAG, "dismiss request activated")
+                MyDialog(
+                    title = stringResource(id = R.string.about_title),
+                    text = stringResource(id = R.string.about_msg),
+                    onDismiss = {
+                        Log.d(TAG, "dismiss button hit")
                         showDialog = false
                         expanded = false
                     },
-                    title = {
-                        Text(stringResource(id = R.string.about_title))
-                    },
-                    text = {
-                        MyScrollText(str = stringResource(id = R.string.about_msg))
-                    },
-
-                    confirmButton = { },        // don't show anything -- not used
-
-                    dismissButton = {
-                        TextButton(
-                            onClick = {
-                                Log.d(TAG, "dismiss button hit")
-                                showDialog = false
-                                expanded = false
-                            }
-                        ) {
-                            Text(stringResource(id = R.string.ok))
-                        }
+                    onDismissRequest = {
+                        Log.d(TAG, "dismissRequesthit")
+                        showDialog = false
+                        expanded = false
                     }
-
                 )
-
             }
 
             DropdownMenuItem(
