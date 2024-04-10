@@ -31,22 +31,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      *
      * The declaration sets the state to its default state or the last state
      * if app was closed unexpected
+     *
+     * mutable state (compose state) which was designed specifically for jetpack compose
      */
-//    val stopwatchState: StateFlow<Int> = savedStateHandle.getStateFlow(STATE_HANDLE_KEY, START_STATE)   // stateflow version
-
-    // mutable state (compose state) which was designed specifically for jetpack compose
     var stopwatchState by mutableIntStateOf(START_STATE)
         private set
-
-    // another way of doing above
-//    var stopwatchState2 by mutableStateOf(START_STATE)
-//        private set
 
 
     /**
      * The time (in millis since jan 1, 1970) the start button was last pushed.
      */
-//    val stopwatchStart: MutableState<Long> = mutableLongStateOf(0L)
     private var stopwatchStart = 0L
 
     /**
@@ -60,9 +54,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * The time the split button was pushed.
      */
-//    val stopwatchSplit: MutableLiveData<Long> by lazy {
-//        MutableLiveData<Long>()
-//    }
     var stopwatchSplit by mutableLongStateOf(0L)
         private set
 

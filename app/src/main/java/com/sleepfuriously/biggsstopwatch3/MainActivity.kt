@@ -586,16 +586,6 @@ fun MyDropdownMenu(modifier: Modifier) {
             // only show the dialog if showDialog is true
             var showDialog by remember { mutableStateOf(false) }
             if (showDialog) {
-//                MyDialog(
-//                    titleStr = stringResource(id = R.string.about_title),
-//                    msgStr = stringResource(id = R.string.about_msg),
-//                    onDismiss = {
-//                        Log.d(TAG, "ok clicked")
-//                        showDialog = false
-//                        expanded = false
-//                    }
-//                )
-
                 AlertDialog(
                     onDismissRequest = {
                         Log.d(TAG, "dismiss request activated")
@@ -692,8 +682,6 @@ fun DownUpButton(
     // necessary for the colors to work correctly.
     if (touchedDown) {
         Log.d(TAG, "SampleButton2() if touchedDown...")
-//        currentBackgroundColor = MaterialTheme.colorScheme.tertiary
-//        currentTextColor = MaterialTheme.colorScheme.onTertiary
         currentBackgroundColor = touchedBackgroundColor
         currentTextColor = touchedTextColor
     }
