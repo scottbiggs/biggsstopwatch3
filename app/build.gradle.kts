@@ -22,11 +22,30 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Enables code shrinking, obfuscation, and optimization for only
+            // your project's release build type. Make sure to use a build
+            // variant with `debuggable false`.
+            isMinifyEnabled = true
+
+            // Enables resource shrinking, which is performed by the
+            // Android Gradle plugin.
+            isShrinkResources = true
+
+            isDebuggable = false
+
             proguardFiles(
+                // Includes the default ProGuard rules files that are packaged with
+                // the Android Gradle plugin. To learn more, go to the section about
+                // R8 configuration files.
                 getDefaultProguardFile("proguard-android-optimize.txt"),
+
+                // Includes a local, custom Proguard rules file
                 "proguard-rules.pro"
             )
+        }
+
+        debug {
+
         }
     }
     compileOptions {
@@ -51,15 +70,15 @@ android {
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
+    implementation("androidx.activity:activity-compose:1.9.0")
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
