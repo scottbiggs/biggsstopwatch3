@@ -2,6 +2,7 @@ package com.sleepfuriously.biggsstopwatch3.ui.theme
 
 import android.app.Activity
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -17,9 +18,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-//    primary = Purple80,
-//    secondary = PurpleGrey80,
-//    tertiary = Pink80
     primary = forest_green,
     secondary = yellow,
     tertiary = maroon,
@@ -30,9 +28,8 @@ private val DarkColorScheme = darkColorScheme(
             // text colors
     onPrimary = Color.White,
     onSecondary = Color.White,
-    onTertiary = Color.White,
+    onTertiary = Color.Black,
     onBackground = Color.White,
-
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -43,13 +40,13 @@ private val LightColorScheme = lightColorScheme(
     secondary = yellow,
     tertiary = maroon,
 
-    background = yellow_dark,
-    surface = yellow_dark,
+    background = yellow_light_background,
+    surface = yellow_light_background,
 
     // text colors
-    onPrimary = Color.Black,
+    onPrimary = Color.White,
     onSecondary = Color.Black,
-    onTertiary = Color.Black,
+    onTertiary = Color.White,
     onBackground = Color.Black,
 
     /* Other default colors to override
@@ -71,12 +68,20 @@ fun BiggsStopwatch3Theme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
+        // use dark theme on old devices
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.S -> {
+            Log.d(TAG, "low SDK. using dark color scheme")
+            DarkColorScheme
+        }
+
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            Log.d(TAG, "has dynamic color and S or greater. Deciding between light and dark")
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
         darkTheme -> DarkColorScheme
+
         else -> LightColorScheme
     }
 
@@ -95,3 +100,5 @@ fun BiggsStopwatch3Theme(
         content = content
     )
 }
+
+private const val TAG = "Theme"

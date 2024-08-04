@@ -16,7 +16,7 @@ import com.sleepfuriously.biggsstopwatch3.R
 
 
 @Suppress("unused")
-const val TAG = "MyDialog"
+private const val TAG = "MyDialog"
 
 
 /**

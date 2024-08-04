@@ -24,3 +24,7 @@ val maroon = Color(0xFF6F1E1E)
 val maroon_dark = Color(0xFF441313)
 val maroon_light = Color(0xFF813C3C)
 val maroon_light_background = Color(0xFFDBD8D8)
+
+val brown = Color(0xFF503B31)
+val brown_dark = Color(0xFF2E221C)
+val brown_light = Color(0xFF7A5A4B)
