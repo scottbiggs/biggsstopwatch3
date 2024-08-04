@@ -271,6 +271,7 @@ fun DrawDropDownMenu(modifier: Modifier = Modifier, mainViewModel: MainViewModel
         modifier = modifier
             .fillMaxWidth()
             .wrapContentSize(Alignment.TopEnd)
+            .padding(end = 8.dp)
     ) {
         IconButton(
             onClick = {
@@ -286,7 +287,6 @@ fun DrawDropDownMenu(modifier: Modifier = Modifier, mainViewModel: MainViewModel
         }
 
         DropdownMenu(
-            modifier = Modifier.align(Alignment.TopEnd),
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
